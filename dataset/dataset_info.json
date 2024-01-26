@@ -1,0 +1,42 @@
+{
+  "builder_name": "json",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "magicoder-evol-instruct-110_k",
+  "dataset_size": 246198605,
+  "description": "",
+  "download_checksums": {
+    "hf://datasets/ise-uiuc/Magicoder-Evol-Instruct-110K@b0079beaa0361d82412520b873715bee59cc7dd4/data-evol_instruct-decontaminated.jsonl": {
+      "num_bytes": 255186224,
+      "checksum": null
+    }
+  },
+  "download_size": 255186224,
+  "features": {
+    "instruction": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "response": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 501384829,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 246198605,
+      "num_examples": 111183,
+      "dataset_name": "magicoder-evol-instruct-110_k"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}
