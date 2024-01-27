@@ -1,12 +1,12 @@
 import argparse
 import json
 import os
+import random
 
 from exllamav2 import (
     ExLlamaV2,
     ExLlamaV2Config,
     ExLlamaV2Cache,
-    ExLlamaV2Cache_8bit,
     ExLlamaV2Tokenizer,
     model_init,
 )
@@ -14,7 +14,7 @@ from datasets import load_from_disk
 from exllamav2.generator import ExLlamaV2BaseGenerator, ExLlamaV2Sampler
 from tqdm import tqdm
 
-from prompt_templates import templates, system_message
+from prompt_templates import system_messages, principles, templates, system_mappings
 from utils import set_seed
 
 
@@ -37,17 +37,23 @@ if __name__ == '__main__':
     print(" -- Loading dataset: " + args.dataset_dir)
     dataset = load_from_disk(args.dataset_dir)
     dataset = dataset.filter(lambda e: args.model_name in e['models'])
+    print(f" -- Number of samples for {args.model_name}: {len(dataset)}")
     instructions = dataset["instruction"]
-    s_instructions = sorted(instructions, key=len)
+    preferences = dataset['preference']
+
+    # sort the instructions by length for more efficient batched padding
+    ip_pairs = list(zip(instructions, preferences))
+    sorted_ip_pairs = sorted(ip_pairs, key=lambda p: len(p[0]))
+    s_instructions, s_preferences = zip(*sorted_ip_pairs)
 
     print(" -- Batching dataset...")
-    prompts = [templates['codellama_instruct'].format(system_message=system_message,
-                                                      instruction=i) for i in s_instructions]
+    prompts = [templates[args.model_name].format(system_message=system_messages[system_mappings[args.model_name]],
+                                                 principle=random.choice(principles[p]),
+                                                 instruction=i) for i, p in sorted_ip_pairs]
     batches = [prompts[i:i + args.batch_size] for i in range(0, len(prompts), args.batch_size)]
 
     model = ExLlamaV2(config)
     print(" -- Loading model: " + args.model_dir)
-
     cache = ExLlamaV2Cache(model, lazy=True, batch_size=args.batch_size)  # Cache needs to accommodate the batch size
     model.load_autosplit(cache)
     tokenizer = ExLlamaV2Tokenizer(config)

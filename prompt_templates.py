@@ -109,7 +109,7 @@ templates = {
                                     "### Instruction:\n"
                                     "{instruction}\n\n"
                                     "### Response:",
-    'mistral-7b-instruct-code': "<|im_start|>system\n"
+    'mistral-7b-instruct': "<|im_start|>system\n"
                                 "{system_message} {principle}<|im_end|>\n"
                                 "<|im_start|>user\n"
                                 "{instruction}<|im_end|>\n"
@@ -130,6 +130,21 @@ templates = {
                         "{principle}\n"
                         "<</SYS>>\n"
                         "{instruction}[/INST]",
+}
+
+system_mappings = {
+    'codellama-34b-instruct': "codellama",
+    'codellama-13b-instruct': "codellama",
+    'codellama-7b-instruct': "codellama",
+    'wizardcoder-33b': "wizardcoder",
+    'wizardcoder-15b': "wizardcoder",
+    'deepseek-coder-33b-instruct': "deepseek-coder",
+    'deepseek-coder-6.7b-instruct': "deepseek-coder",
+    'mistral-7b-instruct': "mistral-instruct-code",
+    'wizardlm-33b': "wizardlm",
+    'wizardlm-7b': "wizardlm",
+    'llama-2-13b-chat': "llama2",
+    'llama-2-70b-chat': "llama2"
 }
 
 if __name__ == "__main__":

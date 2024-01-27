@@ -24,6 +24,7 @@ if __name__ == "__main__":
     dataset = dataset.remove_columns(['response'])
     dataset = dataset.add_column('preference', [None] * len(dataset))
     dataset = dataset.map(lambda ex, i: {'preference': preferences[i % len(preferences)]}, with_indices=True)
+    dataset = dataset.shuffle(seed=seed)
     dataset = dataset.add_column('models', [None] * len(dataset))
     dataset = dataset.map(lambda ex: {'models': random.sample(model_pool, 4)})
     print(f'-- Saving preprocessed dataset...')
