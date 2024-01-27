@@ -17,9 +17,16 @@
       "dtype": "string",
       "_type": "Value"
     },
-    "response": {
+    "preference": {
       "dtype": "string",
       "_type": "Value"
+    },
+    "models": {
+      "feature": {
+        "dtype": "string",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
     }
   },
   "homepage": "",

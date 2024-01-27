@@ -2,7 +2,16 @@ import random
 
 import numpy as np
 import torch
-from datasets import load_dataset
+
+
+model_pool = [
+    'gpt-4', 'gpt-3.5-turbo',
+    'codellama-34b-instruct', 'codellama-13b-instruct', 'wizardcoder-33b', 'wizardcoder-15b',
+    'starcoderplus', 'deepseek-coder-33b-instruct', 'deepseek-coder-6.7b-instruct', 'vicuna-33b-coder',
+    'mistral-7b-instruct', 'wizardlm-33b', 'wizardlm-7b', 'llama-2-13b-chat', 'llama-2-70b-chat'
+]
+
+preferences = ['instruction-following', 'readability', 'complexity', 'style', 'explanation']
 
 
 def set_seed(seed):
@@ -11,9 +20,3 @@ def set_seed(seed):
     torch.cuda.manual_seed_all(seed)
     np.random.seed(seed)
     random.seed(seed)
-
-
-if __name__ == "__main__":
-    dataset = load_dataset("ise-uiuc/Magicoder-Evol-Instruct-110K")["train"]
-    dataset = dataset.shuffle(seed=42).select(range(10000))
-    dataset.save_to_disk("./dataset")
