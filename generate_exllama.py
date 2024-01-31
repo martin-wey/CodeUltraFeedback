@@ -4,20 +4,16 @@ import os
 import random
 
 import torch
+from datasets import load_from_disk
 from exllamav2 import (
-    ExLlamaV2,
-    ExLlamaV2Config,
     ExLlamaV2Cache,
-    ExLlamaV2Tokenizer,
     model_init,
 )
-from datasets import load_from_disk
 from exllamav2.generator import ExLlamaV2BaseGenerator, ExLlamaV2Sampler
 from tqdm import tqdm
 
 from prompt_templates import system_messages, principles, templates, system_mappings
 from utils import set_seed
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

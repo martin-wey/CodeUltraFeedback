@@ -110,10 +110,10 @@ templates = {
                                     "{instruction}\n\n"
                                     "### Response:",
     'mistral-7b-instruct': "<|im_start|>system\n"
-                                "{system_message} {principle}<|im_end|>\n"
-                                "<|im_start|>user\n"
-                                "{instruction}<|im_end|>\n"
-                                "<|im_start|>assistant",
+                           "{system_message} {principle}<|im_end|>\n"
+                           "<|im_start|>user\n"
+                           "{instruction}<|im_end|>\n"
+                           "<|im_start|>assistant",
     'wizardlm-33b': "{system_message} {principle}\n\n"
                     "USER: {instruction}\n"
                     "ASSISTANT:",
