@@ -15,7 +15,7 @@ from prompt_templates import system_messages, principles, templates, system_mapp
 from utils import set_seed
 
 
-# set OPENAI_API_KEY with OpenAI key
+# set OPENAI_API_KEY env. variable with OpenAI key
 
 class APICaller:
     def __init__(self, model, client):
@@ -51,7 +51,6 @@ if __name__ == '__main__':
     parser.add_argument("-d", "--dataset_dir", type=str, help="Path to dataset directory")
     parser.add_argument("-o", "--output_dir", type=str, help="Path to output model responses")
     parser.add_argument("-mn", "--model_name", type=str)
-    parser.add_argument("-st", "--start", type=int, default=0)
     parser.add_argument("-s", "--seed", default=42, type=int)
     args = parser.parse_args()
     set_seed(args.seed)
@@ -77,12 +76,7 @@ if __name__ == '__main__':
         model = AutoGPTQForCausalLM.from_quantized(args.model_dir, device_map='auto', torch_dtype=torch.float16)
         generator = pipeline('text-generation', model=model, tokenizer=tokenizer)
 
-    fname = f'{args.model_name}.jsonl'
-    if args.start > 0:
-        dataset = dataset.select(range(args.start, len(dataset)))
-        fname = f'{args.model_name}_{args.start}.jsonl'
-
-    with open(os.path.join(args.output_dir, fname), "w") as f:
+    with open(os.path.join(args.output_dir, f'{args.model_name}.jsonl'), "w") as f:
         for b, sample in tqdm(enumerate(dataset), total=len(dataset)):
             if args.model_name in ['gpt-3.5-turbo', 'gpt-4-turbo']:
                 response = generator(system_prompt=random.choice(principles[sample['preference']]),
