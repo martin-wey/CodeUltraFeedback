@@ -9,10 +9,9 @@ from auto_gptq import AutoGPTQForCausalLM
 from datasets import load_from_disk
 from openai import OpenAI
 from tqdm import tqdm
-from transformers import AutoTokenizer, pipeline
+from transformers import AutoTokenizer, pipeline, set_seed
 
-from prompt_templates import principles, templates
-from utils import set_seed
+from templates import principles, templates
 
 
 # set OPENAI_API_KEY env. variable with OpenAI key

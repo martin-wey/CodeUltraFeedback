@@ -11,9 +11,9 @@ from exllamav2 import (
 )
 from exllamav2.generator import ExLlamaV2BaseGenerator, ExLlamaV2Sampler
 from tqdm import tqdm
+from transformers import set_seed
 
-from prompt_templates import principles, templates
-from utils import set_seed
+from templates import principles, templates
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
