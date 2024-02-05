@@ -314,6 +314,14 @@ Responses:
 ### Output
 """
 
+judge_templates = {
+    'instruction-following': instruction_following_template,
+    'readability': code_readability_template,
+    'complexity': code_complexity_template,
+    'style': coding_style_template,
+    'explanation': code_explanation_template
+}
+
 # Coding preferences - principles
 
 principles = {
