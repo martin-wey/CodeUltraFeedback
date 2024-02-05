@@ -1,13 +1,13 @@
 # Judgement prompts
+from dataclasses import dataclass
 
-# taken from UltraFeedback
+# taken and adapted from UltraFeedback
 # https://github.com/OpenBMB/UltraFeedback/blob/main/src/data_annotation/preference_templates.py#L1C17-L5C77
-gpt4_judge_system_prompt = """Your role is to evaluate text quality based on given criteria.
+gpt_judge_system_prompt = """Your role is to evaluate text quality based on given criteria.
 You'll receive an instructional description ("Instruction") and four responses ("Response").
 Understand and interpret instructions to evaluate effectively.
 Provide annotations for each response with a rating and rationale.
 The four responses given are independent, and should be evaluated separately."""
-
 
 instruction_following_template = """# Instruction Following Assessment
 
@@ -314,23 +314,7 @@ Responses:
 ### Output
 """
 
-# LLMs instruction prompts
-
-system_messages = {
-    "codellama": "You are an expert programmer. Your task is to solve the following instruction. You must wrap any code in your answer using ```.",
-    "wizardcoder": "Below is an instruction that describes a task. Write a response that appropriately completes the request.",
-    "deepseek-coder": "You are an expert programmer. Your task is to solve the following instruction. "
-                      "You must wrap any code in your answer using ```.",
-    "mistral-instruct-code": "You are an expert programmer. Your task is to solve the following instruction. "
-                             "You must wrap any code in your answer using ```.",
-    "wizardlm": "A chat between a curious user and an artificial intelligence assistant. "
-                "The assistant gives helpful, detailed, and polite answers to the user's questions.",
-    "llama2": "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. "
-              "Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. "
-              "Please ensure that your responses are socially unbiased and positive in nature.\n\n"
-              "If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. "
-              "If you don’t know the answer to a question, please don’t share false information.\n"
-}
+# Coding preferences - principles
 
 principles = {
     "instruction-following": [
@@ -395,81 +379,90 @@ principles = {
     ]
 }
 
+
+# LLMs prompt templates
+
+@dataclass
+class CodeLlamaInstructTemplate:
+    template: str = """[INST] You are an expert programmer. Your task is to solve the following instruction. You must wrap any code in your answer using ```.
+{principle}
+
+### Instruction: {instruction}
+[/INST]
+"""
+
+
+@dataclass
+class WizardCoderTemplate:
+    template: str = """Below is an instruction that describes a task. Write a response that appropriately completes the request.
+{principle}
+
+### Instruction:
+{instruction}
+
+### Response:
+"""
+
+
+@dataclass
+class DeepSeekCoderInstructTemplate:
+    template: str = """You are an expert programmer. Your task is to solve the following instruction. You must wrap any code in your answer using ```.
+{principle}
+
+### Instruction:
+{instruction}
+
+### Response:
+"""
+
+
+@dataclass
+class MistralInstrucTemplate:
+    template: str = """<|im_start|>system
+You are an expert programmer. Your task is to solve the following instruction. You must wrap any code in your answer using ```. {principle}<|im_end|>
+<|im_start|>user
+{instruction}<|im_end|>
+<|im_start|>assistant
+"""
+
+
+@dataclass
+class WizardLMTemplate:
+    template: str = """A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. {principle}
+
+USER: {instruction}
+ASSISTANT:
+"""
+
+
+@dataclass
+class Llama2ChatTemplate:
+    template: str = """<s>[INST] <<SYS>>
+You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
+
+If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don’t know the answer to a question, please don’t share false information.
+
+{principle}
+<</SYS>>
+{instruction}[/INST]
+"""
+
+
 templates = {
-    'codellama-34b-instruct': "[INST] {system_message}\n"
-                              "{principle}\n\n"
-                              "### Instruction: {instruction}\n"
-                              "[/INST]",
-    'codellama-13b-instruct': "[INST] {system_message}\n"
-                              "{principle}\n\n"
-                              "### Instruction: {instruction}\n"
-                              "[/INST]",
-    'codellama-7b-instruct': "[INST] {system_message}\n{principle}\n\n"
-                             "### Instruction: {instruction}\n"
-                             "[/INST]",
-    'wizardcoder-33b': "{system_message}\n"
-                       "{principle}\n\n"
-                       "### Instruction:\n"
-                       "{instruction}\n\n"
-                       "### Response:",
-    'wizardcoder-15b': "{system_message}\n"
-                       "{principle}\n\n"
-                       "### Instruction:\n"
-                       "{instruction}\n\n"
-                       "### Response:",
-    'deepseek-coder-33b-instruct': "{system_message}\n"
-                                   "{principle}\n\n"
-                                   "### Instruction:\n"
-                                   "{instruction}\n\n"
-                                   "### Response:",
-    'deepseek-coder-6.7b-instruct': "{system_message}\n"
-                                    "{principle}\n\n"
-                                    "### Instruction:\n"
-                                    "{instruction}\n\n"
-                                    "### Response:",
-    'mistral-7b-instruct': "<|im_start|>system\n"
-                           "{system_message} {principle}<|im_end|>\n"
-                           "<|im_start|>user\n"
-                           "{instruction}<|im_end|>\n"
-                           "<|im_start|>assistant",
-    'wizardlm-33b': "{system_message} {principle}\n\n"
-                    "USER: {instruction}\n"
-                    "ASSISTANT:",
-    'wizardlm-7b': "{system_message} {principle}\n\n"
-                   "USER: {instruction}\n"
-                   "ASSISTANT:",
-    'llama-2-13b-chat': "<s>[INST] <<SYS>>\n"
-                        "{system_message}\n"
-                        "{principle}\n"
-                        "<</SYS>>\n"
-                        "{instruction}[/INST]",
-    'llama-2-70b-chat': "<s>[INST] <<SYS>>\n"
-                        "{system_message}\n"
-                        "{principle}\n"
-                        "<</SYS>>\n"
-                        "{instruction}[/INST]",
+    'codellama-34b-instruct': CodeLlamaInstructTemplate,
+    'codellama-13b-instruct': CodeLlamaInstructTemplate,
+    'codellama-7b-instruct': CodeLlamaInstructTemplate,
+    'wizardcoder-33b': WizardCoderTemplate,
+    'wizardcoder-15b': WizardCoderTemplate,
+    'deepseek-coder-33b-instruct': DeepSeekCoderInstructTemplate,
+    'deepseek-coder-6.7b-instruct': DeepSeekCoderInstructTemplate,
+    'mistral-7b-instruct': MistralInstrucTemplate,
+    'wizardlm-33b': WizardLMTemplate,
+    'wizardlm-7b': WizardLMTemplate,
+    'llama-2-13b-chat': Llama2ChatTemplate,
+    'llama-2-70b-chat': Llama2ChatTemplate
 }
 
-system_mappings = {
-    'codellama-34b-instruct': "codellama",
-    'codellama-13b-instruct': "codellama",
-    'codellama-7b-instruct': "codellama",
-    'wizardcoder-33b': "wizardcoder",
-    'wizardcoder-15b': "wizardcoder",
-    'deepseek-coder-33b-instruct': "deepseek-coder",
-    'deepseek-coder-6.7b-instruct': "deepseek-coder",
-    'mistral-7b-instruct': "mistral-instruct-code",
-    'wizardlm-33b': "wizardlm",
-    'wizardlm-7b': "wizardlm",
-    'llama-2-13b-chat': "llama2",
-    'llama-2-70b-chat': "llama2"
-}
 
 if __name__ == "__main__":
-    template = templates["deepseek-coder-6.7b-instruct"]
-    prompt_data = {
-        'system_message': system_messages["deepseek-coder"],
-        'principle': principles["instruction-following"][3],
-        'instruction': "Write a function that computes fibonacci sequence."
-    }
-    print(template.format(**prompt_data))
+    print(templates['codellama-7b-instruct'].template)

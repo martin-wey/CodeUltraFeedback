@@ -12,7 +12,7 @@ from exllamav2 import (
 from exllamav2.generator import ExLlamaV2BaseGenerator, ExLlamaV2Sampler
 from tqdm import tqdm
 
-from prompt_templates import system_messages, principles, templates, system_mappings
+from prompt_templates import principles, templates
 from utils import set_seed
 
 if __name__ == '__main__':
@@ -41,9 +41,8 @@ if __name__ == '__main__':
     dataset = dataset.filter(lambda ex: args.model_name in ex['models'])
     print(f" -- Number of samples for {args.model_name}: {len(dataset)}")
     dataset = dataset.map(lambda ex: {
-        'prompt': templates[args.model_name].format(system_message=system_messages[system_mappings[args.model_name]],
-                                                    principle=random.choice(principles[ex['preference']]),
-                                                    instruction=ex['instruction'])
+        'prompt': templates[args.model_name].template.format(principle=random.choice(principles[ex['preference']]),
+                                                             instruction=ex['instruction'])
     })
 
     with torch.inference_mode():
