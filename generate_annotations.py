@@ -20,8 +20,10 @@ from templates import gpt_judge_system_prompt, judge_templates
 
 # Adapted from https://github.com/OpenBMB/UltraFeedback/blob/main/src/data_annotation/annotate_preference.py#L18
 def process(responses):
+    # @todo: better handling of exceptions and errors in response formatting
     annotations = {'ratings': [], 'rationales': []}
     responses = responses.split("\n\n")
+    print(responses)
     if len(responses) != 4:
         annotations['rationales'] = responses
         return annotations
@@ -29,11 +31,18 @@ def process(responses):
         pattern = r"Rating: (.+?)\nRationale: (.+)"
         for response in responses:
             matches = re.search(pattern, response, re.DOTALL)
-            annotations['ratings'].append(re.findall(r'\b\d+\b', matches.group(1))[0] if matches.group(1) != "N/A" else "N/A")
+            try:
+                annotations['ratings'].append(re.findall(r'\b\d+\b', matches.group(1))[0] if matches.group(1) not in ['N/A', '', ' '] else "N/A")
+            except Exception:
+                print(responses)
+                raise Exception
             annotations['rationales'].append(matches.group(2))
     except ValueError or AttributeError as e:
         annotations['rationales'] = responses
         return annotations
+    except IndexError as e:
+        print(responses)
+        raise IndexError
     return annotations
 
 
@@ -44,7 +53,7 @@ class APICaller:
 
     def __call__(self, system_prompt, user_prompt):
         content = None
-        for _ in range(20):
+        for _ in range(1):
             try:
                 response = self.client.chat.completions.create(**{
                     'model': self.model,
@@ -60,7 +69,6 @@ class APICaller:
                 })
                 content = response.choices[0].message.content
             except Exception as e:
-                print(e)
                 time.sleep(1)
             else:
                 break
@@ -89,7 +97,7 @@ if __name__ == '__main__':
     else:
         file_name = f'annotations_{args.model}.jsonl'
 
-    with open(os.path.join(args.output_dir, f'annotations_{args.model}.jsonl'), "w") as f:
+    with open(os.path.join(args.output_dir, file_name), "w") as f:
         with (Progress(
                 TextColumn(
                     f"Annotations - {args.model} •" + "[progress.percentage]{task.percentage:>3.0f}%"
@@ -109,7 +117,10 @@ if __name__ == '__main__':
 
                 response = generator(system_prompt=gpt_judge_system_prompt,
                                      user_prompt=judge_templates[sample['preference']].format(**format_input))
-                annotations = process(response)
-                annotations['order'] = order
+                if response is not None:
+                    annotations = process(response)
+                    annotations['order'] = order
+                else:
+                    annotations = {'ratings': [], 'rationales': [], 'order': order}
                 json.dump(annotations, f)
                 f.write("\n")

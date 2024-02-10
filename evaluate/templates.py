@@ -9,21 +9,21 @@ class Template:
     def __getitem__(self, item):
         return getattr(self, item)
 
+
 @dataclass
 class CodeLlamaInstructTemplate(Template):
     humaneval: str = """[INST] Your task is to write a Python function to solve a programming problem.
-The Python code must be between ```python and ``` tags.
+The Python code must be between [PYTHON] and [/PYTHON] tags.
 
 Provide a self-contained Python script that solves the following problem:
-```python
+[PYTHON]
 {prompt}
-```
-
-Here is a Python script that solves the problem:
-```python
+[/PYTHON]
 [/INST]
 """
-    mbpp: str = """"""
+    mbpp: str = """You are an expert Python programmer, and here is your task: {prompt}
+
+"""
 
 
 @dataclass

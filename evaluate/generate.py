@@ -3,9 +3,10 @@
 
 import argparse
 import os
+import re
 
 import torch
-from auto_gptq import AutoGPTQForCausalLM
+from auto_gptq import AutoGPTQForCausalLM, exllama_set_max_input_length
 from rich.progress import (
     BarColumn,
     MofNCompleteColumn,
@@ -13,7 +14,7 @@ from rich.progress import (
     TextColumn,
     TimeElapsedColumn,
 )
-from transformers import AutoTokenizer, pipeline
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 
 from templates import templates
 
@@ -95,15 +96,18 @@ def code_generate(args, workdir: os.PathLike, model, id_range=None):
                     task["prompt"], args.contract_type, task["contract"]))
                 responses = model(prompt,
                                   max_new_tokens=512,
+                                  temperature=args.temperature,
                                   do_sample=True,
-                                  temperature=0.8,
                                   top_p=0.95,
                                   num_return_sequences=args.n_samples,
                                   return_full_text=False)
-                responses = [r['generated_text'].split('\n```')[0] for r in responses]
-                responses = [r.replace('\t', '    ') for r in responses]
-
+                pattern = r"\[PYTHON\](.*?)\[/PYTHON\]"
+                responses_trimmed = []
                 for response in responses:
+                    codes = re.findall(pattern, response['generated_text'], re.DOTALL)
+                    responses_trimmed.append(codes[0].strip().replace('\t', '    ') if codes else '')
+
+                for response in responses_trimmed:
                     try:
                         with open(
                                 os.path.join(workdir, p_name, f"{sidx}.py"),
@@ -121,7 +125,7 @@ if __name__ == '__main__':
     parser.add_argument("--model_dir", required=True, type=str)
     parser.add_argument("--model", required=True, type=str)
     parser.add_argument("--bs", default=1, type=int)
-    parser.add_argument("--temperature", default=0.0, type=float)
+    parser.add_argument("--temperature", default=0.8, type=float)
     parser.add_argument(
         "--dataset", required=True, type=str, choices=["humaneval", "mbpp"]
     )
@@ -155,9 +159,10 @@ if __name__ == '__main__':
     # Make dataset dir
     os.makedirs(os.path.join(args.root, args.dataset), exist_ok=True)
 
-    # load model here
     tokenizer = AutoTokenizer.from_pretrained(args.model_dir, use_fast=True)
-    model = AutoGPTQForCausalLM.from_quantized(args.model_dir, device_map='auto', torch_dtype=torch.float16)
+    # model = AutoGPTQForCausalLM.from_quantized(args.model_dir, device_map='auto', torch_dtype=torch.float16)
+    model = AutoModelForCausalLM.from_pretrained(args.model_dir, device_map='auto', torch_dtype=torch.float16)
+    model = exllama_set_max_input_length(model, max_input_length=8192)
     generator = pipeline('text-generation', model=model, tokenizer=tokenizer)
 
     workdir = os.path.join(

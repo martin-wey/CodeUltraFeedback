@@ -8,6 +8,13 @@ import torch
 from auto_gptq import AutoGPTQForCausalLM
 from datasets import load_from_disk
 from openai import OpenAI
+from rich.progress import (
+    BarColumn,
+    MofNCompleteColumn,
+    Progress,
+    TextColumn,
+    TimeElapsedColumn,
+)
 from tqdm import tqdm
 from transformers import AutoTokenizer, pipeline, set_seed
 
@@ -23,7 +30,7 @@ class APICaller:
 
     def __call__(self, system_prompt, user_prompt):
         content = None
-        for _ in range(20):
+        for _ in range(5):
             try:
                 response = self.client.chat.completions.create(**{
                     'model': self.model,
@@ -51,14 +58,18 @@ if __name__ == '__main__':
     parser.add_argument("-o", "--output_dir", type=str, help="Path to output model responses")
     parser.add_argument("-st", "--start", default=0, type=int)
     parser.add_argument("-mn", "--model_name", type=str)
+    parser.add_argument("-gr", "--generate_references", action="store_true")
     parser.add_argument("-s", "--seed", default=42, type=int)
     args = parser.parse_args()
     set_seed(args.seed)
 
     print(" -- Loading dataset: " + args.dataset_dir)
     dataset = load_from_disk(args.dataset_dir)
-    dataset = dataset.filter(lambda ex: args.model_name in ex['models'])
-    print(f" -- Number of samples for {args.model_name}: {len(dataset)}")
+
+    if not args.generate_references:
+        dataset = dataset.filter(lambda ex: args.model_name in ex['models'])
+        print(f" -- Number of samples for {args.model_name}: {len(dataset)}")
+
     if args.model_name not in ['gpt-3.5-turbo', 'gpt-4']:
         dataset = dataset.map(lambda ex: {
             'prompt': templates[args.model_name].template.format(
@@ -89,21 +100,40 @@ if __name__ == '__main__':
         file_name = f'{args.model_name}.jsonl'
 
     with open(os.path.join(args.output_dir, file_name), "w") as f:
-        for b, sample in tqdm(enumerate(dataset), total=len(dataset)):
-            if args.model_name in ['gpt-3.5-turbo', 'gpt-4']:
-                response = generator(system_prompt=random.choice(principles[sample['preference']]),
-                                     user_prompt=sample['instruction'])
-            else:
-                response = generator(sample['prompt'],
-                                     max_new_tokens=1024,
-                                     do_sample=True,
-                                     temperature=0.8,
-                                     top_k=50,
-                                     top_p=0.8)
-                response = response[0]['generated_text'][len(sample['prompt']):]
+        with (Progress(
+                TextColumn(
+                    f"Generate responses - {args.model_name} •" + "[progress.percentage]{task.percentage:>3.0f}%"
+                ),
+                BarColumn(),
+                MofNCompleteColumn(),
+                TextColumn("•"),
+                TimeElapsedColumn(),
+        ) as p):
+            for sample in p.track(dataset, total=len(dataset)):
+                # response already in dataset -> copy
+                if args.generate_references and args.model_name in sample['models']:
+                    sample_response = list(filter(lambda e: e['model'] == args.model_name, sample['responses']))
+                    json.dump({
+                        'instruction': sample['instruction'],
+                        'response': sample_response[0]['response']
+                    }, f)
+                    f.write("\n")
+                    continue
 
-            json.dump({
-                'instruction': sample['instruction'],
-                'response': response
-            }, f)
-            f.write("\n")
+                if args.model_name in ['gpt-3.5-turbo', 'gpt-4']:
+                    response = generator(system_prompt=random.choice(principles[sample['preference']]),
+                                         user_prompt=sample['instruction'])
+                else:
+                    response = generator(sample['prompt'],
+                                         max_new_tokens=1024,
+                                         do_sample=True,
+                                         temperature=0.8,
+                                         top_k=50,
+                                         top_p=0.8)
+                    response = response[0]['generated_text'][len(sample['prompt']):]
+
+                json.dump({
+                    'instruction': sample['instruction'],
+                    'response': response
+                }, f)
+                f.write("\n")
