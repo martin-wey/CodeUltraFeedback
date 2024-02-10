@@ -3,7 +3,9 @@ import re
 import argparse
 import json
 
-from datasets import load_dataset, load_from_disk, DatasetDict, concatenate_datasets
+from tqdm import tqdm
+
+from datasets import load_dataset, load_from_disk, DatasetDict, concatenate_datasets, Dataset
 from transformers import set_seed
 
 model_pool = [
@@ -172,6 +174,25 @@ def binarize_dataset(dataset_dir: str = None):
     dataset.save_to_disk('dataset_binarized')
 
 
+def create_sft_dataset(dataset_dir: str = None):
+    dataset = load_from_disk(dataset_dir)
+    dataset_sft = load_dataset('ise-uiuc/Magicoder-Evol-Instruct-110K', split='train')
+    dataset_sft = dataset_sft.filter(lambda ex: not contains_chinese_like_characters(ex["instruction"]))
+
+    instructions_dataset = dataset['instruction']
+    instructions_dataset_sft = dataset_sft['instruction']
+
+    indices = []
+    for instruction in tqdm(instructions_dataset):
+        index = instructions_dataset_sft.index(instruction)
+        indices.append(index)
+
+    dataset_sft_filtered = [sample for index, sample in enumerate(dataset_sft) if index not in indices]
+    dataset_sft_filtered = Dataset.from_list(dataset_sft_filtered)
+
+    dataset_sft_filtered.save_to_disk('dataset_sft')
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--dataset_dir', type=str, default='./dataset')
@@ -182,6 +203,7 @@ if __name__ == '__main__':
     parser.add_argument('-ma', '--merge_annotations', action='store_true')
     parser.add_argument('-s', '--split_dataset', action='store_true')
     parser.add_argument('-b', '--binarize_dataset', action='store_true')
+    parser.add_argument('-sft', '--create_sft_dataset', action='store_true')
     args = parser.parse_args()
 
     if args.create_dataset:
@@ -198,3 +220,6 @@ if __name__ == '__main__':
 
     if args.binarize_dataset:
         binarize_dataset(args.dataset_dir)
+
+    if args.create_sft_dataset:
+        create_sft_dataset(args.dataset_dir)
