@@ -1,27 +1,21 @@
 import logging
-import sys
+import random
 
-import torch
 import transformers
 from datasets import load_from_disk
-from transformers import set_seed
 from rich.logging import RichHandler
+from transformers import set_seed
 from trl import DPOTrainer
+from unsloth import FastLanguageModel, PatchDPOTrainer
 
 from alignment import (
     DataArguments,
     DPOConfig,
     H4ArgumentParser,
     ModelArguments,
-    apply_chat_template,
-    get_checkpoint,
-    get_datasets,
-    get_kbit_device_map,
-    get_peft_config,
-    get_quantization_config,
-    get_tokenizer,
-    is_adapter_model,
+    get_tokenizer
 )
+from principles import principles
 
 logger = logging.getLogger("rich")
 
@@ -48,55 +42,72 @@ def main():
 
     set_seed(training_args.seed)
 
+    ###############
+    # Load datasets
+    ###############
     raw_datasets = load_from_disk(data_args.dataset_dir)
     logger.info(
         f"Training on the following splits: {[split + ' : ' + str(dset.num_rows) for split, dset in raw_datasets.items()]}"
     )
+    column_names = list(raw_datasets["train"].features)
 
     data_args.truncation_side = "left"  # Truncate from left to ensure we don't lose labels in final turn
     tokenizer = get_tokenizer(model_args, data_args)
 
-    def apply_template(example):
-        template = """[INST] You are an expert programmer. Your task is to solve the following instruction. You must wrap any code in your answer using ```.
-        
-        ### Coding Preference: {preference}
-        
-        ### Instruction: {instruction}
-        [/INST]
-        """
-        return {
-            'prompt': template.format(preference=example['preference'], instruction=example['instruction']),
-            'chosen': example['chosen'],
-            'rejected': example['rejected']
-        }
+    #####################
+    # Apply chat template
+    #####################
+    def apply_chat_template(example):
+        prompt_msg = [
+            {'content': random.choice(principles[example['preference']]), 'role': 'system'},
+            {'content': example['instruction'], 'role': 'user'},
+        ]
+        chosen_msg = [
+            {'content': example['chosen'], 'role': 'assistant'}
+        ]
+        rejected_msg = [
+            {'content': example['rejected'], 'role': 'assistant'}
+        ]
+        example['text_chosen'] = tokenizer.apply_chat_template(chosen_msg, tokenize=False)
+        example['text_rejected'] = tokenizer.apply_chat_template(rejected_msg, tokenize=False)
+        example['text_prompt'] = tokenizer.apply_chat_template(prompt_msg, tokenize=False)
 
-    column_names = list(raw_datasets["train"].features)
-    raw_datasets = raw_datasets.map(apply_template, remove_columns=column_names)
+        return example
 
-    torch_dtype = (
-        model_args.torch_dtype if model_args.torch_dtype in ["auto", None] else getattr(torch, model_args.torch_dtype)
-    )
-    quantization_config = get_quantization_config(model_args)
-
-    model_kwargs = dict(
-        revision=model_args.model_revision,
-        trust_remote_code=model_args.trust_remote_code,
-        use_flash_attention_2=model_args.use_flash_attention_2,
-        torch_dtype=torch_dtype,
-        use_cache=False if training_args.gradient_checkpointing else True,
-        device_map=get_kbit_device_map() if quantization_config is not None else None,
-        quantization_config=quantization_config,
+    raw_datasets = raw_datasets.map(
+        apply_chat_template,
+        num_proc=data_args.preprocessing_num_workers,
+        remove_columns=column_names,
+        desc="Applying chat template"
     )
 
-    model = model_args.model_name_or_path
-    ref_model = model
-    ref_model_kwargs = model_kwargs
+    # Replace column names with what TRL needs, text_chosen -> chosen and text_rejected -> rejected
+    for split in ["train", "test"]:
+        raw_datasets[split] = raw_datasets[split].rename_columns(
+            {"text_prompt": "prompt", "text_chosen": "chosen", "text_rejected": "rejected"}
+        )
 
+    # Log a few random samples from the training set:
+    for index in random.sample(range(len(raw_datasets["train"])), 3):
+        logger.info(f"Prompt sample {index} of the raw training set:\n\n{raw_datasets['train'][index]['prompt']}")
+        logger.info(f"Chosen sample {index} of the raw training set:\n\n{raw_datasets['train'][index]['chosen']}")
+        logger.info(f"Rejected sample {index} of the raw training set:\n\n{raw_datasets['train'][index]['rejected']}")
+
+    #######################
+    # Load pretrained model
+    #######################
+    logger.info("*** Loading pretrained model ***")
+    model, tokenizer = FastLanguageModel.from_pretrained(
+        model_name=model_args.model_name_or_path,
+        max_seq_length=4096,
+        dtype=None,
+        load_in_4bit=model_args.load_in_4bit
+    )
+
+    PatchDPOTrainer()
     trainer = DPOTrainer(
-        model,
-        ref_model,
-        model_init_kwargs=model_kwargs,
-        ref_model_init_kwargs=ref_model_kwargs,
+        model=model,
+        ref_model=None,
         args=training_args,
         beta=training_args.beta,
         train_dataset=raw_datasets["train"],
@@ -104,11 +115,13 @@ def main():
         tokenizer=tokenizer,
         max_length=training_args.max_length,
         max_prompt_length=training_args.max_prompt_length,
-        peft_config=get_peft_config(model_args),
         loss_type=training_args.loss_type,
     )
 
-    checkpoint = None
+    ###############
+    # Training loop
+    ###############
+    logger.info("*** Train ***")
     train_result = trainer.train()
     metrics = train_result.metrics
     metrics["train_samples"] = len(raw_datasets["train"])
@@ -117,6 +130,25 @@ def main():
     trainer.save_state()
 
     logger.info("*** Training complete ***")
+
+    ##########
+    # Evaluate
+    ##########
+    if training_args.do_eval:
+        logger.info("*** Evaluate ***")
+        metrics = trainer.evaluate()
+        metrics["eval_samples"] = len(raw_datasets["test"])
+        trainer.log_metrics("eval", metrics)
+        trainer.save_metrics("eval", metrics)
+
+    ##################################
+    # Save model and create model card
+    ##################################
+    logger.info("*** Save model ***")
+    trainer.save_model(training_args.output_dir)
+    logger.info(f"Model saved to {training_args.output_dir}")
+
+    logger.info("*** Training complete! ***")
 
 
 if __name__ == '__main__':

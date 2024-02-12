@@ -158,7 +158,7 @@ def binarize_dataset(dataset_dir: str = None):
         random_lowest_rated_model = random.choice(lowest_rated_models)
 
         chosen_model_response = list(filter(lambda ex: ex['model'] == random_highest_rated_model, example['responses']))[0]
-        rejected_model_response = list(filter(lambda ex: ex['model'] == random_highest_rated_model, example['responses']))[0]
+        rejected_model_response = list(filter(lambda ex: ex['model'] == random_lowest_rated_model, example['responses']))[0]
 
         example['chosen'] = chosen_model_response['response']
         example['rejected'] = rejected_model_response['response']
