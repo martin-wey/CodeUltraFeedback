@@ -12,8 +12,7 @@ from alignment import (
     DataArguments,
     DPOConfig,
     H4ArgumentParser,
-    ModelArguments,
-    get_tokenizer
+    ModelArguments
 )
 from principles import principles
 
@@ -51,8 +50,21 @@ def main():
     )
     column_names = list(raw_datasets["train"].features)
 
+    #######################
+    # Load pretrained model
+    #######################
+    logger.info("*** Loading pretrained model ***")
+    model, tokenizer = FastLanguageModel.from_pretrained(
+        model_name=model_args.model_name_or_path,
+        max_seq_length=4096,
+        dtype=None,
+        load_in_4bit=model_args.load_in_4bit
+    )
+    if tokenizer.pad_token_id is None:
+        tokenizer.pad_token_id = tokenizer.eos_token_id
     data_args.truncation_side = "left"  # Truncate from left to ensure we don't lose labels in final turn
-    tokenizer = get_tokenizer(model_args, data_args)
+    tokenizer.truncation_side = data_args.truncation_side
+    tokenizer.chat_template = data_args.chat_template
 
     #####################
     # Apply chat template
@@ -93,17 +105,9 @@ def main():
         logger.info(f"Chosen sample {index} of the raw training set:\n\n{raw_datasets['train'][index]['chosen']}")
         logger.info(f"Rejected sample {index} of the raw training set:\n\n{raw_datasets['train'][index]['rejected']}")
 
-    #######################
-    # Load pretrained model
-    #######################
-    logger.info("*** Loading pretrained model ***")
-    model, tokenizer = FastLanguageModel.from_pretrained(
-        model_name=model_args.model_name_or_path,
-        max_seq_length=4096,
-        dtype=None,
-        load_in_4bit=model_args.load_in_4bit
-    )
-
+    ########################
+    # Initialize the Trainer
+    ########################
     PatchDPOTrainer()
     trainer = DPOTrainer(
         model=model,

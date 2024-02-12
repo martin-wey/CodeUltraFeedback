@@ -13,8 +13,6 @@ from alignment import (
     SFTConfig,
     H4ArgumentParser,
     ModelArguments,
-    get_checkpoint,
-    get_tokenizer,
     split_dataset,
     maybe_insert_system_message
 )
@@ -43,11 +41,6 @@ def main():
 
     set_seed(training_args.seed)
 
-    # Check for last checkpoint
-    last_checkpoint = get_checkpoint(training_args)
-    if last_checkpoint is not None and training_args.resume_from_checkpoint is None:
-        logger.info(f"Checkpoint detected, resuming training at {last_checkpoint=}.")
-
     ###############
     # Load datasets
     ###############
@@ -58,10 +51,25 @@ def main():
     )
     column_names = list(raw_datasets["train"].features)
 
-    ################
-    # Load tokenizer
-    ################
-    tokenizer = get_tokenizer(model_args, data_args)
+    #######################
+    # Load pretrained model
+    #######################
+    model, tokenizer = FastLanguageModel.from_pretrained(
+        model_name=model_args.model_name_or_path,
+        max_seq_length=4096,
+        dtype=None,
+        load_in_4bit=model_args.load_in_4bit
+    )
+
+    model = FastLanguageModel.get_peft_model(
+        model,
+        r=model_args.lora_r,
+        target_modules=model_args.lora_target_modules,
+        lora_alpha=model_args.lora_alpha,
+        lora_dropout=0,
+        bias="none",
+        use_gradient_checkpointing=True
+    )
 
     #####################
     # Apply chat template
@@ -86,26 +94,6 @@ def main():
 
     for index in random.sample(range(len(raw_datasets["train"])), 3):
         logger.info(f"Sample {index} of the processed training set:\n\n{raw_datasets['train'][index]['text']}")
-
-    #######################
-    # Load pretrained model
-    #######################
-    model, tokenizer = FastLanguageModel.from_pretrained(
-        model_name=model_args.model_name_or_path,
-        max_seq_length=4096,
-        dtype=None,
-        load_in_4bit=model_args.load_in_4bit
-    )
-
-    model = FastLanguageModel.get_peft_model(
-        model,
-        r=model_args.lora_r,
-        target_modules=model_args.lora_target_modules,
-        lora_alpha=model_args.lora_alpha,
-        lora_dropout=0,
-        bias="none",
-        use_gradient_checkpointing=True
-    )
 
     ########################
     # Initialize the Trainer

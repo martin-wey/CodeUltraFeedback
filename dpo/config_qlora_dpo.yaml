@@ -39,7 +39,7 @@ logging_strategy: steps
 lr_scheduler_type: cosine
 max_length: 2048
 max_prompt_length: 1024
-num_train_epochs: 10
+num_train_epochs: 3
 output_dir: ./dpo/dpo_runs/codellama-7b-instruct-dpo-qlora
 overwrite_output_dir: true
 per_device_eval_batch_size: 4
