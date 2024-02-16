@@ -15,7 +15,7 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 
-from templates import gpt_judge_system_prompt, judge_templates
+from templates import judge_system_prompt, judge_templates
 
 
 # Adapted from https://github.com/OpenBMB/UltraFeedback/blob/main/src/data_annotation/annotate_preference.py#L18
@@ -77,10 +77,10 @@ class APICaller:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--dataset_dir', type=str, default='./dataset_responses')
-    parser.add_argument("-o", "--output_dir", type=str, default='./dataset_responses/annotations')
-    parser.add_argument('-m', '--model', type=str, default='gpt-3.5-turbo')
-    parser.add_argument("-st", "--start", default=0, type=int)
+    parser.add_argument('--dataset_dir', type=str, default='./dataset_responses')
+    parser.add_argument("--output_dir", type=str, default='./dataset_responses/annotations')
+    parser.add_argument('--model', type=str, default='gpt-3.5-turbo')
+    parser.add_argument("--start", default=0, type=int)
     args = parser.parse_args()
 
     dataset = load_from_disk(args.dataset_dir)
@@ -115,7 +115,7 @@ if __name__ == '__main__':
                 random.shuffle(order)
                 format_input.update({f'response_{i+1}': sample['responses'][o]['response'] for i, o in enumerate(order)})
 
-                response = generator(system_prompt=gpt_judge_system_prompt,
+                response = generator(system_prompt=judge_system_prompt,
                                      user_prompt=judge_templates[sample['preference']].format(**format_input))
                 if response is not None:
                     annotations = process(response)

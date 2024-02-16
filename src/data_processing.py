@@ -90,7 +90,8 @@ def merge_annotations(dataset_dir: str = './dataset_responses', annotations_file
         annotations = [json.loads(l) for l in f]
 
     def add_annotations(example, idx):
-        for i, rating, rationale in zip(annotations[idx]['order'], annotations[idx]['ratings'],
+        for i, rating, rationale in zip(annotations[idx]['order'],
+                                        annotations[idx]['ratings'],
                                         annotations[idx]['rationales']):
             example['annotations'].append({
                 'model': example['responses'][i]['model'],
@@ -104,8 +105,8 @@ def merge_annotations(dataset_dir: str = './dataset_responses', annotations_file
 
 
 def split_dataset(dataset_dir: str = './dataset_annotations',
-                  train_size: float = 0.9,
-                  test_size: float = 0.1,
+                  train_size: float = 0.95,
+                  test_size: float = 0.05,
                   seed: int = 42):
     random.seed(seed)
     dataset = load_from_disk(dataset_dir)
@@ -139,6 +140,8 @@ def split_dataset(dataset_dir: str = './dataset_annotations',
         "test": test_dataset,
     })
 
+    print(dataset_dict)
+
     dataset_dict.save_to_disk('dataset_splits')
 
 
@@ -170,6 +173,8 @@ def binarize_dataset(dataset_dir: str = None):
         return example
 
     dataset = dataset.map(select_responses)
+
+    print(dataset)
 
     dataset.save_to_disk('dataset_binarized')
 
@@ -209,17 +214,22 @@ if __name__ == '__main__':
     if args.create_dataset:
         create_dataset(args.dataset_dir)
 
+    # merge LLMs responses
     if args.merge_responses:
         merge_responses(args.dataset_dir, args.responses_dir)
 
+    # merge judge annotations
     if args.merge_annotations:
         merge_annotations(args.dataset_dir, args.annotations_file)
 
+    # create train-test splits of the annotated dataset
     if args.split_dataset:
         split_dataset(args.dataset_dir)
 
+    # binarize the splited dataset for DPO
     if args.binarize_dataset:
         binarize_dataset(args.dataset_dir)
 
+    # create SFT dataset by filtering out CodeUltraFeedback samples
     if args.create_sft_dataset:
         create_sft_dataset(args.dataset_dir)

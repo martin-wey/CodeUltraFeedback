@@ -1,11 +1,11 @@
 # Model arguments
-model_name_or_path: ./dpo/sft_runs/codellama-7b-instruct-sft-qlora/checkpoint-900
+model_name_or_path: ./runs/codellama-7b-instruct-sft-qlora/checkpoint-1484
 torch_dtype: bfloat16
 
 # LoRA arguments
 load_in_4bit: true
 use_peft: true
-lora_r: 128
+lora_r: 64
 lora_alpha: 128
 lora_dropout: 0.05
 lora_target_modules:
@@ -39,16 +39,15 @@ logging_strategy: steps
 lr_scheduler_type: cosine
 max_length: 2048
 max_prompt_length: 1024
-num_train_epochs: 3
-output_dir: ./dpo/dpo_runs/codellama-7b-instruct-dpo-qlora
+num_train_epochs: 10
+output_dir: ./runs/codellama-7b-instruct-dpo-qlora
 overwrite_output_dir: true
-per_device_eval_batch_size: 4
+per_device_eval_batch_size: 1
 per_device_train_batch_size: 2
 # push_to_hub: true
 # report_to:
 # - tensorboard
-save_strategy: "steps"
-save_steps: 100
-save_total_limit: 1
+save_strategy: "epoch"
+save_total_limit: 10
 seed: 42
 warmup_ratio: 0.1

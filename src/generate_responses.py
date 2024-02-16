@@ -15,13 +15,12 @@ from rich.progress import (
     TextColumn,
     TimeElapsedColumn,
 )
-from tqdm import tqdm
 from transformers import AutoTokenizer, pipeline, set_seed
 
-from templates import principles, templates
+from templates import model_templates, principles
 
 
-# set OPENAI_API_KEY env. variable with OpenAI key
+# set OPENAI_API_KEY env. variable with OpenAI key before running this script
 
 class APICaller:
     def __init__(self, model, client):
@@ -53,13 +52,13 @@ class APICaller:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-m", "--model_dir", type=str, help="Path to model directory")
-    parser.add_argument("-d", "--dataset_dir", type=str, help="Path to dataset directory")
-    parser.add_argument("-o", "--output_dir", type=str, help="Path to output model responses")
-    parser.add_argument("-st", "--start", default=0, type=int)
-    parser.add_argument("-mn", "--model_name", type=str)
-    parser.add_argument("-gr", "--generate_references", action="store_true")
-    parser.add_argument("-s", "--seed", default=42, type=int)
+    parser.add_argument("--model_dir", type=str, help="Path to model directory")
+    parser.add_argument("--dataset_dir", type=str, help="Path to dataset directory")
+    parser.add_argument("--output_dir", type=str, help="Path to output model responses")
+    parser.add_argument("--start", default=0, type=int)
+    parser.add_argument("--model_name", type=str)
+    parser.add_argument("--generate_references", action="store_true")
+    parser.add_argument("--seed", default=42, type=int)
     args = parser.parse_args()
     set_seed(args.seed)
 
@@ -72,7 +71,7 @@ if __name__ == '__main__':
 
     if args.model_name not in ['gpt-3.5-turbo', 'gpt-4']:
         dataset = dataset.map(lambda ex: {
-            'prompt': templates[args.model_name].template.format(
+            'prompt': model_templates[args.model_name].template.format(
                 principle=random.choice(principles[ex['preference']]),
                 instruction=ex['instruction'])
         })
