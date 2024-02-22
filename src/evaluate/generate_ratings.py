@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import random
+import re
 
 import openai
 from datasets import load_from_disk, load_dataset
@@ -48,7 +49,6 @@ def main():
 
     logger.info("Loading references: " + args.references_fp)
     assert os.path.exists(args.references_fp), f"Cannot load references file: {args.references_fp} does not exist."
-
     with open(args.references_fp, 'r') as f:
         references = [json.loads(l) for l in f]
     references_instructions = [r['instruction'] for r in references]
@@ -60,10 +60,6 @@ def main():
     dataset = dataset.add_column('reference', [None] * len(dataset))
     dataset = dataset.map(get_response)
 
-    for example in dataset.select(range(1)):
-        logger.info(f'{example["instruction"]}')
-        logger.info(f'{example["reference"]}')
-
     logger.info("Loading responses...")
     model_a_path = os.path.join(args.model_responses_dir, f'{args.model_a}_responses.jsonl')
     assert os.path.exists(model_a_path), f"Cannot load model responses: {model_a_path} does not exist."
@@ -74,32 +70,24 @@ def main():
         model_b_path = os.path.join(args.model_responses_dir, f'{args.model_b}_responses.jsonl')
         assert os.path.exists(model_b_path), f"Cannot load model responses: {model_b_path} does not exist."
         responses_files.append(model_b_path)
-    
-    assistant_prefix = "<|assistant|>\n"
-    responses_data = [[]] * len(responses_files)
 
+    responses_data = [[]] * len(responses_files)
     for i, path in enumerate(responses_files):
         with open(path, 'r') as f:
             for line in f:
                 line_data = json.loads(line)
-                response = line_data['response']
-
-                if assistant_prefix in line_data['response']:
-                    response = response.lstrip(assistant_prefix)
-
-                responses_data[i].append(response)
+                responses_data[i].append(line_data['response'])
 
     client = OpenAI()
 
     prefix = 'single' if len(responses_files) == 1 else 'pairwise'
     models = f'{args.model_a}_{args.model_b}' if len(responses_files) == 2 else args.model_a
-    reference = 'ref_gpt-3.5' if 'gpt-3.5' in args.references_fp else 'ref_gpt-4'
 
     output_dir = os.path.join(args.model_responses_dir, prefix)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir, exist_ok=True)
 
-    output_file = os.path.join(output_dir, f'{models}_{reference}_judgements_{args.model_judge}.jsonl')
+    output_file = os.path.join(output_dir, f'{models}_judge_{args.model_judge}.jsonl')
 
     with open(output_file, "w") as fout:
         with (Progress(
@@ -120,22 +108,31 @@ def main():
                         reference=sample['reference'],
                         response=responses[i]
                     )
-                    try:
-                        response = client.chat.completions.create(**{
-                            'model': args.model_judge,
-                            'messages': [
-                                {'role': 'system', 'content': single_grading_system_prompt},
-                                {'role': 'user', 'content': prompt}
-                            ],
-                            'temperature': 0,
-                            'max_tokens': 1024,
-                        })
-                        response = response.choices[0].message.content
-                    except openai.BadRequestError:
-                        # most likely hallucination in the response
-                        response = 'N/A'
+                    rating = 'N/A'
+                    for _ in range(5):
+                        try:
+                            response = client.chat.completions.create(**{
+                                'model': args.model_judge,
+                                'messages': [
+                                    {'role': 'system', 'content': single_grading_system_prompt},
+                                    {'role': 'user', 'content': prompt}
+                                ],
+                                'temperature': 0,
+                                'max_tokens': 1024,
+                            })
+                            response = response.choices[0].message.content
+                            match = re.search(r'\bRating:\s*(\d+)\b', response)
+                            if match:
+                                rating = int(match.group(1))
+                                break
+                        except openai.BadRequestError:
+                            # most likely hallucination in the response
+                            response = 'N/A'
+                            logging.error(f'Could not process following response (idx={i}):\n\n{responses[i]}\n')
+                    if rating == 'N/A':
                         logging.error(f'Could not process following response (idx={i}):\n\n{responses[i]}\n')
-                    json.dump({'judgement': response}, fout)
+                    logger.info(f'Rating: {rating}')
+                    json.dump({'judgement': response, 'rating': rating}, fout)
                     fout.write('\n')
                 else:
                     # pairwise grading with responses position swapping

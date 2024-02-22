@@ -1,5 +1,5 @@
 # Model arguments
-model_name_or_path: codellama/CodeLlama-7b-Instruct-Hf
+model_name_or_path: ./runs/codellama-7b-instruct-sft-qlora/checkpoint-494
 torch_dtype: bfloat16
 
 # LoRA arguments
@@ -7,7 +7,7 @@ load_in_4bit: true
 use_peft: true
 lora_r: 64
 lora_alpha: 128
-lora_dropout: 0
+lora_dropout: 0.05
 lora_target_modules:
 - q_proj
 - k_proj
@@ -19,36 +19,31 @@ lora_target_modules:
 
 # Data training arguments
 chat_template: "{% for message in messages %}\n{% if message['role'] == 'user' %}\n{{ '<|user|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == 'system' %}\n{{ '<|system|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == 'assistant' %}\n{{ '<|assistant|>\n'  + message['content'] + eos_token }}\n{% endif %}\n{% if loop.last and add_generation_prompt %}\n{{ '<|assistant|>' }}\n{% endif %}\n{% endfor %}"
-dataset_dir: ./datasets/dataset_sft
+dataset_dir: ./datasets/dataset_binarized
 preprocessing_num_workers: 12
 
-# SFT trainer config
+# DPO trainer config
 bf16: true
-optim: adamw_8bit
+beta: 0.1
 do_eval: true
 evaluation_strategy: epoch
-gradient_accumulation_steps: 8
+gradient_accumulation_steps: 16
 gradient_checkpointing: true
 gradient_checkpointing_kwargs:
   use_reentrant: false
-# hub_model_id: codellama-7b-instruct-sft-qlora
-# hub_strategy: every_save
-learning_rate: 2.0e-04
+learning_rate: 5.0e-5
 log_level: info
 logging_steps: 5
 logging_strategy: steps
-lr_scheduler_type: cosine
-max_seq_length: 2048
-max_steps: -1
-num_train_epochs: 10
-output_dir: ./runs/codellama-7b-instruct-sft-qlora
+lr_scheduler_type: linear
+max_length: 2048
+max_prompt_length: 1024
+num_train_epochs: 5
+output_dir: ./runs/codellama-7b-instruct-sft1-dpo-qlora
 overwrite_output_dir: true
-per_device_eval_batch_size: 4
-per_device_train_batch_size: 8
-# push_to_hub: true
-# report_to:
-# - tensorboard
+per_device_eval_batch_size: 1
+per_device_train_batch_size: 2
 save_strategy: "epoch"
-save_total_limit: 10
+save_total_limit: 5
 seed: 42
 warmup_ratio: 0.1
