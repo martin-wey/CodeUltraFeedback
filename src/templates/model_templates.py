@@ -1,5 +1,3 @@
-# LLMs prompt templates for generation
-
 from dataclasses import dataclass
 
 

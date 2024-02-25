@@ -14,7 +14,6 @@ from alignment import (
     H4ArgumentParser,
     ModelArguments
 )
-from src.templates import principles
 
 logger = logging.getLogger("rich")
 
@@ -56,22 +55,38 @@ def main():
     logger.info("*** Loading pretrained model ***")
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name=model_args.model_name_or_path,
-        max_seq_length=4096,
+        max_seq_length=training_args.max_seq_length,
         dtype=None,
         load_in_4bit=model_args.load_in_4bit
     )
+
+    if "runs/" not in model_args.model_name_or_path:
+        logger.info("Initialising new LoRA adapter modules.")
+        # if not a local SFT model, then we initialise a new LoRA adapter
+        model = FastLanguageModel.get_peft_model(
+            model,
+            r=model_args.lora_r,
+            lora_alpha=model_args.lora_alpha,
+            lora_dropout=model_args.lora_dropout,
+            target_modules=model_args.lora_target_modules,
+            bias="none",
+            use_gradient_checkpointing=training_args.gradient_checkpointing,
+        )
+
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
-    data_args.truncation_side = "left"  # Truncate from left to ensure we don't lose labels in final turn
-    tokenizer.truncation_side = data_args.truncation_side
-    tokenizer.chat_template = data_args.chat_template
+
+    tokenizer.truncation_side = "left"
+
+    if data_args.chat_template is not None:
+        tokenizer.chat_template = data_args.chat_template
 
     #####################
     # Apply chat template
     #####################
     def apply_chat_template(example):
         prompt_msg = [
-            {'content': random.choice(principles[example['preference']]), 'role': 'system'},
+            {'content': "", 'role': 'system'},
             {'content': example['instruction'], 'role': 'user'},
         ]
         chosen_msg = [

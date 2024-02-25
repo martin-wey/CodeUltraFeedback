@@ -1,5 +1,5 @@
 # Model arguments
-model_name_or_path: deepseek-ai/deepseek-coder-6.7b-instruct
+model_name_or_path: codellama/CodeLlama-7b-Instruct-hf
 torch_dtype: bfloat16
 
 # LoRA arguments
@@ -39,7 +39,7 @@ lr_scheduler_type: cosine
 max_seq_length: 2048
 max_steps: -1
 num_train_epochs: 5
-output_dir: ./runs/deepseek-coder-6.7b-instruct-sft-qlora
+output_dir: ./runs/codellama-7b-instruct-sft-qlora
 overwrite_output_dir: true
 per_device_eval_batch_size: 4
 per_device_train_batch_size: 8

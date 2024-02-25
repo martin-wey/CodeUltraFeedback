@@ -1,11 +1,10 @@
-import random
-import re
 import argparse
 import json
-
-from tqdm import tqdm
+import random
+import re
 
 from datasets import load_dataset, load_from_disk, DatasetDict, concatenate_datasets, Dataset
+from tqdm import tqdm
 from transformers import set_seed
 
 model_pool = [
@@ -36,7 +35,7 @@ def contains_chinese_like_characters(text):
 def create_dataset(output_dir: str = './dataset'):
     """
     Extract a 10k instructions subset of MagiCoder EvolInstruct dataset.
-    Associate one coding preference with each sample.
+    Associate one coding preference (`preferences`) with each sample and 4 random LLMs from `model_pool`.
     """
     seed = 42
     set_seed(seed)
@@ -83,6 +82,7 @@ def merge_responses(dataset_dir: str = './dataset', responses_dir: str = './data
 
 
 def merge_annotations(dataset_dir: str = './dataset_responses', annotations_file: str = None):
+    """Merge LLM judge annotations with the dataset."""
     dataset = load_from_disk(dataset_dir)
     dataset = dataset.add_column('annotations', [[]] * len(dataset))
 
@@ -108,6 +108,10 @@ def split_dataset(dataset_dir: str = './dataset_annotations',
                   train_size: float = 0.95,
                   test_size: float = 0.05,
                   seed: int = 42):
+    """
+    Split dataset into train/test sets.
+    Keep identical ratios of samples per coding preferences.
+    """
     random.seed(seed)
     dataset = load_from_disk(dataset_dir)
 
@@ -139,13 +143,15 @@ def split_dataset(dataset_dir: str = './dataset_annotations',
         "train": train_dataset,
         "test": test_dataset,
     })
-
-    print(dataset_dict)
-
     dataset_dict.save_to_disk('dataset_splits')
 
 
 def binarize_dataset(dataset_dir: str = None):
+    """
+    Binarize CodeUltraFeedback dataset for DPO.
+    The chosen response is the one with the highest rating. The rejected response is the one with the lowest rating.
+    If more than a single LLM have the highest/lowest ratings, we randomly pick one as chosen/rejected.
+    """
     dataset = load_from_disk(dataset_dir)
 
     def select_responses(example):
@@ -173,13 +179,14 @@ def binarize_dataset(dataset_dir: str = None):
         return example
 
     dataset = dataset.map(select_responses)
-
-    print(dataset)
-
     dataset.save_to_disk('dataset_binarized')
 
 
 def create_sft_dataset(dataset_dir: str = None):
+    """
+    Create a dataset for supervised fine-tuning.
+    We select MagiCoder EvolInstruct dataset and filter out samples that appear in CodeUltraFeedback.
+    """
     dataset = load_from_disk(dataset_dir)
     dataset_sft = load_dataset('ise-uiuc/Magicoder-Evol-Instruct-110K', split='train')
     dataset_sft = dataset_sft.filter(lambda ex: not contains_chinese_like_characters(ex["instruction"]))

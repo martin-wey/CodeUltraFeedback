@@ -1,12 +1,10 @@
 import logging
 import random
 
-import torch
 import transformers
 from datasets import load_from_disk
-from peft import LoraConfig
 from rich.logging import RichHandler
-from transformers import set_seed, AutoTokenizer, BitsAndBytesConfig
+from transformers import set_seed
 from trl import SFTTrainer
 from unsloth import FastLanguageModel
 

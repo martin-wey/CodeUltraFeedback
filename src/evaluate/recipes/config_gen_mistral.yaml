@@ -1,0 +1,13 @@
+# Model arguments
+model_name_or_path: runs/mistral-7b-instruct-dpo-qlora/checkpoint-593/
+model_name: mistral-7b-instruct-dpo2
+
+# Data arguments
+dataset_name_or_path: datasets/dataset_splits
+dataset_split: test
+output_dir: runs/eval_results/
+chat_template: "{% for message in messages %}\n{% if message['role'] == 'user' %}\n{{ '<|user|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == 'system' %}\n{{ '<|system|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == 'assistant' %}\n{{ '<|assistant|>\n'  + message['content'] + eos_token }}\n{% endif %}\n{% if loop.last and add_generation_prompt %}\n{{ '<|assistant|>' }}\n{% endif %}\n{% endfor %}"
+
+# Generation config
+max_new_tokens: 1024
+greedy: True

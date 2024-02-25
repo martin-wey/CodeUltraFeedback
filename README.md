@@ -13,13 +13,12 @@
 </p>
 
 <p align="center">
-    <a href="#introduction"> Introduction</a> •
-    <a href="#">Section 1</a> •
-    <a href="#">Section 2</a> •
-    <a href="#">Section 3</a> •
-    <a href="#ultrarm">Leaderboard</a> •
-    <a href="#ultrarm">📝 Citation</a> •
-    <a href="#ultrarm">Acknowledgements</a>
+    <a href="#">🤔 About</a> •
+    <a href="#">🧠 Models</a> •
+    <a href="#">🤗 Datasets</a> •
+    <a href="#">🏆 Leaderboard</a> •
+    <a href="#">📝 Citation</a> •
+    <a href="#">🙏 Acknowledgements</a>
 </p>
 
 > [!IMPORTANT]
@@ -28,3 +27,26 @@
 **Contact:** [Martin Weyssow](https://martin-wey.github.io/).
 
 ## About
+
+<div style="text-align: center;">
+
+![Overview of CodeUltraFeedback](assets/CodeUltraFeedback.svg)
+
+</div>
+
+## 🧠 Models
+
+| Model                                     | Checkpoint                                                         |  Size   |     HumanEval (+)     |       MBPP (+)        | License                                                                            |
+|:------------------------------------------|:-------------------------------------------------------------------|:-------:|:---------------------:|:---------------------:|:-----------------------------------------------------------------------------------|
+| **CodeLlama-7B-Instruct-SFT**             | 🤗 [HF Link](https://huggingface.co/ise-uiuc/Magicoder-CL-7B)      |  `7B`   |      60.4 (55.5)      |      64.2 (52.6)      | [Llama2](https://ai.meta.com/llama/license/)                                       |
+| **CodeLlama-7B-Instruct-DPO**             | 🤗 [HF Link](https://huggingface.co/ise-uiuc/Magicoder-S-CL-7B)    |  `7B`   |      70.7 (66.5)      |      68.4 (56.6)      | [Llama2](https://ai.meta.com/llama/license/)                                       |
+| **CodeLlama-7B-Instruct-SFT+DPO**         | 🤗 [HF Link](https://huggingface.co/ise-uiuc/Magicoder-DS-6.7B)    |  `7B`   |      66.5 (60.4)      |      75.4 (61.9)      | [Llama2](https://ai.meta.com/llama/license/)                                       |
+| **DeepSeek-Coder-6.7B-Instruct-SFT**      | 🤗 [HF Link](https://huggingface.co/ise-uiuc/Magicoder-S-DS-6.7B)  | `6.7B`  |  **76.8** (**70.7**)  |  **75.7** (**64.4**)  | [DeepSeek](https://github.com/deepseek-ai/DeepSeek-Coder/blob/main/LICENSE-MODEL)  |
+| **DeepSeek-Coder-6.7B-Instruct-DPO**      | 🤗 [HF Link](https://huggingface.co/ise-uiuc/Magicoder-S-DS-6.7B)  | `6.7B`  |  **76.8** (**70.7**)  |  **75.7** (**64.4**)  | [DeepSeek](https://github.com/deepseek-ai/DeepSeek-Coder/blob/main/LICENSE-MODEL)  |
+| **DeepSeek-Coder-6.7B-Instruct-SFT+DPO**  | 🤗 [HF Link](https://huggingface.co/ise-uiuc/Magicoder-S-DS-6.7B)  | `6.7B`  |  **76.8** (**70.7**)  |  **75.7** (**64.4**)  | [DeepSeek](https://github.com/deepseek-ai/DeepSeek-Coder/blob/main/LICENSE-MODEL)  |
+
+
+## 🤗 Datasets
+- **CodeUltraFeedback**
+- **CodeUltraFeedback-SFT**
+- **CodeUltraFeedback-Binarized**

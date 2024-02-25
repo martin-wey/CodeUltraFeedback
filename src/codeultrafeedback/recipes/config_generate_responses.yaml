@@ -1,0 +1,11 @@
+# Model arguments
+model_name: gpt-3.5-turbo
+
+# Data arguments
+dataset_name_or_path: datasets/dataset_responses
+output_dir: datasets/dataset_responses/annotations
+
+# Config arguments
+temperature: 0
+top_p: 0.6
+max_new_tokens: 500

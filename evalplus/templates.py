@@ -1,45 +1,21 @@
-from dataclasses import dataclass
+sft_dpo_models_template = (
+    "{% for message in messages %}\n{% if message['role'] == 'user' %}\n{{ '<|user|>\n' "
+    "+ message['content'] + eos_token }}\n{% elif message['role'] == 'system' %}\n{{ "
+    "'<|system|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == "
+    "'assistant' %}\n{{ '<|assistant|>\n'  + message['content'] + eos_token }}\n{% "
+    "endif %}\n{% if loop.last and add_generation_prompt %}\n{{ '<|assistant|>\n```python' }}\n{% "
+    "endif %}\n{% endfor %}"
+)
 
-
-@dataclass
-class Template:
-    humaneval: str
-    mbpp: str
-
-    def __getitem__(self, item):
-        return getattr(self, item)
-
-
-@dataclass
-class CodeLlamaInstructTemplate(Template):
-    humaneval: str = """[INST] Your task is to write a Python function to solve a programming problem.
-The Python code must be between [PYTHON] and [/PYTHON] tags.
-
-Provide a self-contained Python script that solves the following problem:
-[PYTHON]
-{prompt}
-[/PYTHON]
-[/INST]
-"""
-    mbpp: str = """You are an expert Python programmer, and here is your task: {prompt}
-
-"""
-
-
-@dataclass
-class DeepSeekCoderInstructTemplate(Template):
-    humaneval: str = """"""
-    mbpp: str = """"""
-
-
-@dataclass
-class WizardCoderTemplate(Template):
-    humaneval: str = """"""
-    mbpp: str = """"""
-
-
-templates = {
-    'codellama-7b-instruct': CodeLlamaInstructTemplate(),
-    'codellama-13b-instruct': CodeLlamaInstructTemplate(),
-    'codellama-34b-instruct': CodeLlamaInstructTemplate(),
-}
+codellama_template = (
+    "{% for message in messages %}\n"
+    "   {% if message['role'] == 'user' %}\n"
+    "       {{ '\n' + message['content'] + '[/INST]' }}\n"
+    "   {% elif message['role'] == 'system' %}\n"
+    "       {{ '[INST] ' + message['content'] }}\n"
+    "   {% endif %}\n"
+    "   {% if loop.last and add_generation_prompt %}\n"
+    "       {{ '```python' }}\n"
+    "   {% endif %}\n"
+    "{% endfor %}"
+)
