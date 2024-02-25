@@ -101,17 +101,17 @@ def main():
                         reference=sample['reference'],
                         response=responses[i]
                     )
-                    response = generator(
-                        system_prompt=single_grading_system_prompt,
-                        user_prompt=prompt
-                    )
-                    if response is not None:
+                    try:
+                        response = generator(
+                            system_prompt=single_grading_system_prompt,
+                            user_prompt=prompt
+                        )
                         match = re.search(r'\bRating:\s*(\d+)\b', response)
                         if match:
                             rating = int(match.group(1))
-                    else:
-                        logger.error(response)
-                        rating = 'N/A'
+                    except Exception as e:
+                        logger.error(e)
+                        rating = "N/A"
 
                     logger.info(f'Rating: {rating}')
                     json.dump({'judgement': response, 'rating': rating}, fout)

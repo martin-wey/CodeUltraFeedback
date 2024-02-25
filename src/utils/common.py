@@ -115,4 +115,4 @@ class APICaller:
             except Exception:
                 error = "An error occurred."
                 attempt += 1
-        return error
+        raise Exception(error)
