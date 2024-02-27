@@ -55,7 +55,7 @@ def main():
     logger.info("*** Loading pretrained model ***")
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name=model_args.model_name_or_path,
-        max_seq_length=training_args.max_seq_length,
+        max_seq_length=2048,
         dtype=None,
         load_in_4bit=model_args.load_in_4bit
     )

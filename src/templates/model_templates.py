@@ -36,7 +36,7 @@ class DeepSeekCoderInstructTemplate:
 
 
 @dataclass
-class MistralInstrucTemplate:
+class MistralInstructTemplate:
     template: str = """<|im_start|>system
 You are an expert programmer. Your task is to solve the following instruction. You must wrap any code in your answer using ```. {principle}<|im_end|>
 <|im_start|>user
@@ -75,7 +75,7 @@ model_templates = {
     'wizardcoder-15b': WizardCoderTemplate,
     'deepseek-coder-33b-instruct': DeepSeekCoderInstructTemplate,
     'deepseek-coder-6.7b-instruct': DeepSeekCoderInstructTemplate,
-    'mistral-7b-instruct': MistralInstrucTemplate,
+    'mistral-7b-instruct': MistralInstructTemplate,
     'wizardlm-33b': WizardLMTemplate,
     'wizardlm-7b': WizardLMTemplate,
     'llama-2-13b-chat': Llama2ChatTemplate,

@@ -33,8 +33,8 @@ def main():
 
     if data_args.references_path:
         logger.info(f"Loading references: {data_args.references_path}")
-        assert (os.path.exists(data_args.references_path),
-                f"Cannot load references file: {data_args.references_path} does not exist.")
+        assert os.path.exists(data_args.references_path), \
+            f"Cannot load references file: {data_args.references_path} does not exist."
         with open(data_args.references_path, 'r') as f:
             references = [json.loads(l) for l in f]
         references_instructions = [r['instruction'] for r in references]
@@ -101,16 +101,16 @@ def main():
                         reference=sample['reference'],
                         response=responses[i]
                     )
-                    try:
-                        response = generator(
-                            system_prompt=single_grading_system_prompt,
-                            user_prompt=prompt
-                        )
-                        match = re.search(r'\bRating:\s*(\d+)\b', response)
-                        if match:
-                            rating = int(match.group(1))
-                    except Exception as e:
-                        logger.error(e)
+
+                    response = generator(
+                        system_prompt=single_grading_system_prompt,
+                        user_prompt=prompt
+                    )
+                    match = re.search(r'\bRating:\s*(\d+)\b', response)
+                    if match:
+                        rating = int(match.group(1))
+                    else:
+                        logger.info(response)
                         rating = "N/A"
 
                     logger.info(f'Rating: {rating}')

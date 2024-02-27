@@ -71,7 +71,7 @@ def load_model_and_tokenizer(model_args, generation_args):
     elif "-sft" in model_args.model_name or "-dpo" in model_args.model_name:
         model, tokenizer = FastLanguageModel.from_pretrained(
             model_name=model_args.model_name_or_path,
-            max_seq_length=4096,
+            max_seq_length=2048,
             dtype=None,
             load_in_4bit=True
         )
@@ -110,9 +110,8 @@ class APICaller:
             except openai.BadRequestError:
                 error = ("An error occurred: OpenAI could not process the prompt. "
                          "This is most likely due to repetitive words in the prompt.")
-                time.sleep(1)
-                attempt += 1
+                break
             except Exception:
                 error = "An error occurred."
                 attempt += 1
-        raise Exception(error)
+        return error
