@@ -30,6 +30,15 @@
 
 ## About
 
+<div align="center">
+
+<figure>
+    <img src="assets/CodeUltraFeedback.svg"
+         alt="CodeUltraFeedback Overview">
+    <figcaption><i>Overview of CodeUltraFeedback dataset construction (see <a href="">Section II of our paper</a> for more details).</i></figcaption>
+</figure>
+</div>
+
 > Given the increasing coding capabilities of large language models (LLMs), the following question emerges:
 > 
 > _How well do these capabilities align with the expectations of developers, particularly concerning non-functional requirements such as code readability, efficiency, and adherence to best practices?_
@@ -51,12 +60,6 @@ It has an analogous construction procedure to [UltraFeedback](https://github.com
 The approach enables the judge LLM to provide consistent ratings and evaluate each LLM individually (similar to [MT-Bench](https://github.com/lm-sys/FastChat/tree/main/fastchat/llm_judge)). 
 
 The following figure gives a broad overview of CodeUltraFeedback's construction procedure (see **Section II of our paper** for more details).
-
-<div align="center">
-
-![Overview of CodeUltraFeedback](assets/CodeUltraFeedback.svg)
-
-</div>
 
 ## 🚀 Getting Started 
 
