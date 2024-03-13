@@ -30,14 +30,14 @@
 
 ## About
 
-<div align="center">
-
 <figure>
+    <div align="center">
     <img src="assets/CodeUltraFeedback.svg"
          alt="CodeUltraFeedback Overview">
     <figcaption><i>Overview of CodeUltraFeedback dataset construction (see <a href="">Section II of our paper</a> for more details).</i></figcaption>
+    </div>
 </figure>
-</div>
+
 
 > Given the increasing coding capabilities of large language models (LLMs), the following question emerges:
 > 
