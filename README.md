@@ -7,7 +7,7 @@
 
 <p align="center">
     <a href="https://openreview.net/forum?id=1qvx610Cu7"><img src="https://img.shields.io/badge/ArXiV-ICSE'25-a55fed.svg"></a>
-    <a href="https://huggingface.co/evalplus/"><img src="https://img.shields.io/badge/🤗%20Hugging%20Face-CodeUltraFeedback-%23ff8811.svg"></a>
+    <a href="https://huggingface.co/datasets/coseal/CodeUltraFeedback"><img src="https://img.shields.io/badge/🤗%20Hugging%20Face-CodeUltraFeedback-%23ff8811.svg"></a>
     <a href="https://github.com/martin-wey/CodeUltraFeedback/blob/main/LICENSE"><img src="https://img.shields.io/github/license/martin-wey/CodeUltraFeedback"></a>
 </p>
 
