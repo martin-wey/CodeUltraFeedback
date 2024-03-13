@@ -3,7 +3,6 @@
 
 import argparse
 import os
-import re
 
 import torch
 from auto_gptq import exllama_set_max_input_length

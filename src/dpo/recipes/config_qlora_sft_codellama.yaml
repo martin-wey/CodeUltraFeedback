@@ -24,7 +24,6 @@ preprocessing_num_workers: 12
 
 # SFT trainer config
 bf16: true
-optim: adamw_8bit
 do_eval: true
 evaluation_strategy: epoch
 gradient_accumulation_steps: 8

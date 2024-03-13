@@ -44,7 +44,7 @@ def main():
     model_args, data_args, generation_args = parser.parse()
     set_seed(42)
 
-    logger = setup_logger(name="CodeUltraFeedback - Annotations Generation")
+    logger = setup_logger()
 
     logger.info(f"Loading dataset - {data_args.dataset_name_or_path}")
     dataset = load_dataset(data_args.dataset_name_or_path, data_args.dataset_split)

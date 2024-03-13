@@ -1,6 +1,6 @@
 import logging
-import time
 
+import anthropic
 import datasets
 import openai
 import torch
@@ -46,15 +46,25 @@ def load_dataset(dataset_name_or_path, split=None):
 
 
 def load_model_and_tokenizer(model_args, generation_args):
-    if not model_args.model_name_or_path and "gpt-" in model_args.model_name:
-        client = OpenAI()
-        generator = APICaller(
-            model=model_args.model_name,
-            client=client,
-            temperature=generation_args.temperature,
-            max_tokens=generation_args.max_new_tokens,
-            top_p=generation_args.top_p
-        )
+    if not model_args.model_name_or_path:
+        if "gpt-" in model_args.model_name:
+            client = OpenAI()
+            generator = APICaller(
+                model=model_args.model_name,
+                client=client,
+                temperature=generation_args.temperature,
+                max_tokens=generation_args.max_new_tokens,
+                top_p=generation_args.top_p
+            )
+        elif "claude" in model_args.model_name:
+            client = anthropic.Anthropic()
+            generator = APICaller(
+                model=model_args.model_name,
+                client=client,
+                temperature=generation_args.temperature,
+                max_tokens=generation_args.max_new_tokens,
+                top_p=generation_args.top_p
+            )
         return generator, None, None
     elif "GPTQ" in model_args.model_name_or_path:
         tokenizer = AutoTokenizer.from_pretrained(model_args.model_name_or_path, use_fast=True)
@@ -85,7 +95,7 @@ def load_model_and_tokenizer(model_args, generation_args):
 class APICaller:
     def __init__(self, model, client=None, retries=5, temperature=0.8, max_tokens=1024, top_p=1.0):
         self.model = model
-        self.client = client or OpenAI()
+        self.client = client
         self.retries = retries
         self.temperature = temperature
         self.max_tokens = max_tokens
@@ -96,22 +106,34 @@ class APICaller:
         error = ""
         while attempt < self.retries:
             try:
-                response = self.client.chat.completions.create(**{
-                    "model": self.model,
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt}
-                    ],
-                    "temperature": self.temperature,
-                    "max_tokens": self.max_tokens,
-                    "top_p": self.top_p
-                })
-                return response.choices[0].message.content
+                if "gpt-" in self.model:
+                    response = self.client.chat.completions.create(**{
+                        "model": self.model,
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": user_prompt}
+                        ],
+                        "temperature": self.temperature,
+                        "max_tokens": self.max_tokens,
+                        "top_p": self.top_p
+                    })
+                    return response.choices[0].message.content
+                elif "claude" in self.model:
+                    message = self.client.messages.create(
+                        model="claude-3-sonnet-20240229",
+                        max_tokens=self.max_tokens,
+                        temperature=self.temperature,
+                        system=system_prompt,
+                        messages=[
+                            {"role": "user", "content": user_prompt}
+                        ]
+                    )
+                    return message.content[0].text
             except openai.BadRequestError:
                 error = ("An error occurred: OpenAI could not process the prompt. "
                          "This is most likely due to repetitive words in the prompt.")
                 break
-            except Exception:
-                error = "An error occurred."
+            except Exception as e:
+                error = e
                 attempt += 1
         return error

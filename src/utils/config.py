@@ -22,11 +22,6 @@ class ModelArguments:
         default=None,
         metadata={"help": "Name of the model to judge when generating ratings."}
     )
-    model_b: Optional[str] = field(
-        default=None,
-        metadata={"help": ("Name of the model to judge when generating ratings."
-                           "If specified, the judge performs pairwise grading with `model_a` and `model_b`.")}
-    )
     model_judge: Optional[str] = field(
         default=None,
         metadata={"help": "Name of the LLM judge (must be an OpenAI model)."}
