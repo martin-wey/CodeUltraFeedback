@@ -64,10 +64,10 @@ The following figure gives a broad overview of CodeUltraFeedback's construction 
 
 We provide all the source code implemented to build CodeUltraFeedback and evaluate LLMs on CODAL-Bench.
 
-> [!NOTE]
+> [!IMPORTANT]
 > 
 > We are currently working on instructions to:
-> 1. Build CodeUltraFeedback
+> 1. Build CodeUltraFeedback or extend the dataset
 > 2. Tune your own SFT and DPO LLMs
 > 3. Evaluate LLMs on CODAL-Bench
 
