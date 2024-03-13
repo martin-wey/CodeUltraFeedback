@@ -39,6 +39,12 @@
 
 ## 🧠 Models
 
+<style scoped>
+table {
+  font-size: 12px;
+}
+</style>
+
 | Model                             | Checkpoint                                                              | Size | CODAL-Bench - GPT-3.5<br/><span style="font-size:.8em;">(G-3.5, G-4)</span> | CODAL-Bench - GPT-4 <br/><span style="font-size:.8em;">G-4</span> | HumanEval (+)<br/><span style="font-size:.8em;">(k=1, k=10)</span> | License                                      |
 |:----------------------------------|:------------------------------------------------------------------------|:----:|:---------------------------------------------------------------------------:|:-----------------------------------------------------------------:|:------------------------------------------------------------------:|:---------------------------------------------|
 | **CodeLlama-7B-Instruct**         | 🤗 [HF Link](https://huggingface.co/codellama/CodeLlama-7b-Instruct-hf) | `7B` |                                 6.00 / 5.46                                 |                               4.72                                |                            37.9 / 60.4                             | [Llama2](https://ai.meta.com/llama/license/) |
