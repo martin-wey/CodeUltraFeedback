@@ -48,10 +48,11 @@ It has an analogous construction procedure to [UltraFeedback](https://github.com
 * ✨ **Large pool of LLMs**: We use a large pool of 14 LLMs from 8 model families to generate responses to the 10k instructions to consider diverse writing and coding styles.
 * ✨ **LLM-as-a-judge and AI feedback**: We use GPT-3.5 as a judge for evaluating LLMs responses, which annotates each response with both numerical and textual feedback. The AI feedback data can be leveraged for various applications, including model alignment through RLAIF, tuning a critic LLM, and more.
 
-`CODAL-Bench` 
+`CODAL-Bench` is a benchmark of 500 coding problems (_100 per coding preference_). We use LLM-as-a-judge with reference-guided single-answer grading using GPT-3.5 or GPT-4 to rank LLMs alignment. 
+The approach enables the judge LLM to provide consistent ratings and evaluate each LLM individually (similar to [MT-Bench](https://github.com/lm-sys/FastChat/tree/main/fastchat/llm_judge)). 
 
 The following figure gives a broad overview of CodeUltraFeedback's construction procedure (see **Section II of our paper** for more details).
-<div style="text-align: center;">
+<div align="center">
 
 ![Overview of CodeUltraFeedback](assets/CodeUltraFeedback.svg)
 
