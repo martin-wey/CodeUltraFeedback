@@ -31,6 +31,26 @@
 
 ## About
 
+> Given the increasing coding capabilities of large language models (LLMs), the following question emerges:
+> 
+> _How well do these capabilities align with the expectations of developers, particularly concerning non-functional requirements such as code readability, efficiency, and adherence to best practices?_
+>
+> We believe existing benchmarks relying on automated metrics and static analysis tools are insufficient and too rigid for evaluating the broader capabilities of LLMs. 
+> Instead, we believe LLM-as-a-judge offers a more viable alternative (_or a proxy to human evaluation_) to evaluate LLMs while effectively considering the intricacies of natural and programming languages.
+
+Our work features two main contributions: `CodeUltraFeedback` and `CODAL-Bench`, a dataset and benchmark for aligning LLMs to coding preferences and evaluate their alignment using LLM-as-a-judge.
+
+`CodeUltraFeedback` is a preference dataset of complex coding instructions to align LLMs to coding preferences. 
+It has an analogous construction procedure to [UltraFeedback](https://github.com/OpenBMB/UltraFeedback), featuring:
+
+* ✨ **Complex instructions**: CodeUltraFeedback is based on a 10k subset of [MagiCoder Evol-Instruct](https://huggingface.co/datasets/ise-uiuc/Magicoder-Evol-Instruct-110K) comprising open domain complex coding instructions.
+* ✨ **Coding preferences**: CodeUltraFeedback includes 5 coding preferences, which are crucial to evaluate the broader capabilities of LLMs: **instruction-following**, **code explanation**, **code complexity and efficiency**, **code readability**, and **coding style**.
+* ✨ **Large pool of LLMs**: We use a large pool of 14 LLMs from 8 model families to generate responses to the 10k instructions to consider diverse writing and coding styles.
+* ✨ **LLM-as-a-judge and AI feedback**: We use GPT-3.5 as a judge for evaluating LLMs responses, which annotates each response with both numerical and textual feedback. The AI feedback data can be leveraged for various applications, including model alignment through RLAIF, tuning a critic LLM, and more.
+
+`CODAL-Bench` 
+
+The following figure gives a broad overview of CodeUltraFeedback's construction procedure (see **Section II of our paper** for more details).
 <div style="text-align: center;">
 
 ![Overview of CodeUltraFeedback](assets/CodeUltraFeedback.svg)
@@ -39,18 +59,12 @@
 
 ## 🧠 Models
 
-<style scoped>
-table {
-  font-size: 12px;
-}
-</style>
-
-| Model                             | Checkpoint                                                              | Size | CODAL-Bench - GPT-3.5<br/><span style="font-size:.8em;">(G-3.5, G-4)</span> | CODAL-Bench - GPT-4 <br/><span style="font-size:.8em;">G-4</span> | HumanEval (+)<br/><span style="font-size:.8em;">(k=1, k=10)</span> | License                                      |
-|:----------------------------------|:------------------------------------------------------------------------|:----:|:---------------------------------------------------------------------------:|:-----------------------------------------------------------------:|:------------------------------------------------------------------:|:---------------------------------------------|
-| **CodeLlama-7B-Instruct**         | 🤗 [HF Link](https://huggingface.co/codellama/CodeLlama-7b-Instruct-hf) | `7B` |                                 6.00 / 5.46                                 |                               4.72                                |                            37.9 / 60.4                             | [Llama2](https://ai.meta.com/llama/license/) |
-| **CodeLlama-7B-Instruct-SFT**     | 🤗 [HF Link](https://huggingface.co/codellama/CodeLlama-7b-Instruct-hf) | `7B` |                                 6.51 / 5.83                                 |                               5.84                                |                            51.2 / 82.9                             | [Llama2](https://ai.meta.com/llama/license/) |
-| **CodeLlama-7B-Instruct-DPO**     | 🤗 [HF Link](https://huggingface.co/codellama/CodeLlama-7b-Instruct-hf) | `7B` |                                 7.15 / 6.79                                 |                               5.08                                |                            42.3 / 80.5                             | [Llama2](https://ai.meta.com/llama/license/) |
-| **CodeLlama-7B-Instruct-SFT+DPO** | 🤗 [HF Link](https://huggingface.co/codellama/CodeLlama-7b-Instruct-hf) | `7B` |                                 7.36 / 7.08                                 |                               5.85                                |                            43.1 / 75.6                             | [Llama2](https://ai.meta.com/llama/license/) |
+| Model                             | Checkpoint                                                              | Size | CODAL-Bench GPT-3.5<br/>(G-3.5, G-4) | CODAL-Bench GPT-4 <br/>(G-4) | HumanEval+<br/>(k=1, k=10) | License                                      |
+|:----------------------------------|:------------------------------------------------------------------------|:----:|:------------------------------------:|:----------------------------:|:--------------------------:|:---------------------------------------------|
+| **CodeLlama-7B-Instruct**         | 🤗 [HF Link](https://huggingface.co/codellama/CodeLlama-7b-Instruct-hf) | `7B` |             6.00 / 5.46              |             4.72             |        37.9 / 60.4         | [Llama2](https://ai.meta.com/llama/license/) |
+| **CodeLlama-7B-Instruct-SFT**     | 🤗 [HF Link](https://huggingface.co/codellama/CodeLlama-7b-Instruct-hf) | `7B` |             6.51 / 5.83              |             5.84             |    **51.2** / **82.9**     | [Llama2](https://ai.meta.com/llama/license/) |
+| **CodeLlama-7B-Instruct-DPO**     | 🤗 [HF Link](https://huggingface.co/codellama/CodeLlama-7b-Instruct-hf) | `7B` |             7.15 / 6.79              |             5.08             |        42.3 / 80.5         | [Llama2](https://ai.meta.com/llama/license/) |
+| **CodeLlama-7B-Instruct-SFT+DPO** | 🤗 [HF Link](https://huggingface.co/codellama/CodeLlama-7b-Instruct-hf) | `7B` |         **7.36** / **7.08**          |           **5.85**           |        43.1 / 75.6         | [Llama2](https://ai.meta.com/llama/license/) |
 
 ## 🤗 Datasets and Benchmark
 - **CodeUltraFeedback**
