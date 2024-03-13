@@ -58,8 +58,6 @@ It has an analogous construction procedure to [UltraFeedback](https://github.com
 `CODAL-Bench` is a benchmark of 500 coding problems (_100 per coding preference_). We use LLM-as-a-judge with reference-guided single-answer grading using GPT-3.5 or GPT-4 to evaluate LLM alignment. 
 The approach enables the judge LLM to provide consistent ratings and evaluate each LLM individually (similar to [MT-Bench](https://github.com/lm-sys/FastChat/tree/main/fastchat/llm_judge)). 
 
-The following figure gives a broad overview of CodeUltraFeedback's construction procedure (see **Section II of our paper** for more details).
-
 ## 🚀 Getting Started 
 
 We provide all the source code implemented to build CodeUltraFeedback and evaluate LLMs on CODAL-Bench.
