@@ -8,14 +8,15 @@
 <p align="center">
     <a target="_blank" href="https://arxiv.org/abs/2403.09032"><img src="https://img.shields.io/badge/ArXiV-2404.09032-a55fed.svg"></a>
     <a target="_blank" href="https://huggingface.co/datasets/coseal/CodeUltraFeedback"><img src="https://img.shields.io/badge/🤗%20Hugging%20Face-CodeUltraFeedback-%23ff8811.svg"></a>
-    <a target="_blank" href="https://github.com/martin-wey/CodeUltraFeedback/blob/main/LICENSE"><img src="https://img.shields.io/github/license/martin-wey/CodeUltraFeedback"></a>
+    <a target="_blank" href="https://github.com/martin-wey/CodeUltraFeedback/blob/main/LICENSE"><img src="https://img.shields.io/github/license/martin-wey/CodeUltraFeedback
+"></a>
 </p>
 
 <p align="center">
-    <a href="#-about">🤔 About</a> •
+    <a href="#about">🤔 About</a> •
     <a href="#-getting-started">🚀 Getting Started</a> •
-    <a href="#-models">🧠 Models</a> •
-    <a href="#-datasets-and-benchmark">🤗 Datasets</a> •
+    <a href="#models">🧠 Models</a> •
+    <a href="#datasets-and-benchmark">🤗 Datasets</a> •
     <a href="#-citation">📝 Citation</a>
 </p>
 
