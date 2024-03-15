@@ -36,7 +36,7 @@
 
 ![Overview of CodeUltraFeedback](assets/CodeUltraFeedback.svg)
 
-_Overview of CodeUltraFeedback dataset construction (see [Section II of our paper]() for more details)._
+_Overview of CodeUltraFeedback dataset construction (see [Section II of our paper](https://arxiv.org/abs/2403.09032) for more details)._
 </div>
 
 > Given the increasing coding capabilities of large language models (LLMs), the following question emerges:
