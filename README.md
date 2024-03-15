@@ -43,7 +43,7 @@ _Overview of CodeUltraFeedback dataset construction (see [Section II of our pape
 > _How well do these capabilities align with the expectations of developers, particularly concerning non-functional requirements such as code readability, efficiency, and adherence to best practices?_
 >
 > We believe existing benchmarks relying on automated metrics and static analysis tools are insufficient and too rigid for evaluating the broader capabilities of LLMs. 
-> Instead, we believe LLM-as-a-judge offers a more viable alternative (_or proxy to human evaluation_) to evaluate LLMs while effectively considering the intricacies of natural and programming languages.
+> Instead, we believe LLM-as-a-judge offers a more nuanced strategy (_or proxy to human evaluation_) to evaluate LLMs while effectively considering the intricacies of natural and programming languages.
 
 Our work features two main contributions: `CodeUltraFeedback` and `CODAL-Bench`, a dataset and benchmark for aligning LLMs to coding preferences and evaluating their alignment using LLM-as-a-judge.
 
@@ -80,9 +80,18 @@ We provide all the source code implemented to build CodeUltraFeedback and evalua
 
 ##  Datasets and Benchmark
 - 🤗 **CodeUltraFeedback**: [https://huggingface.co/datasets/coseal/CodeUltraFeedback](https://huggingface.co/datasets/coseal/CodeUltraFeedback)
-- 🤗 **Magicoder-Evol-Instruct-110K-sft**: [https://huggingface.co/datasets/coseal/Magicoder-Evol-Instruct-110K-sft](https://huggingface.co/datasets/coseal/Magicoder-Evol-Instruct-110K-sft)
 - 🤗 **CodeUltraFeedback binarized**: [https://huggingface.co/datasets/coseal/CodeUltraFeedback_binarized](https://huggingface.co/datasets/coseal/CodeUltraFeedback_binarized)
 - 🤗 **CODAL-Bench**: [https://huggingface.co/datasets/coseal/codal-bench](https://huggingface.co/datasets/coseal/codal-bench)
+- 🤗 **Magicoder-Evol-Instruct-110K-sft**: [https://huggingface.co/datasets/coseal/Magicoder-Evol-Instruct-110K-sft](https://huggingface.co/datasets/coseal/Magicoder-Evol-Instruct-110K-sft)
 
 ## 📝 Citation
-
+```bibtex
+@misc{weyssow2024codeultrafeedback,
+  title={CodeUltraFeedback: An LLM-as-a-Judge Dataset for Aligning Large Language Models to Coding Preferences}, 
+  author={Martin Weyssow and Aton Kamanda and Houari Sahraoui},
+  year={2024},
+  eprint={2403.09032},
+  archivePrefix={arXiv},
+  primaryClass={cs.SE}
+}
+```
