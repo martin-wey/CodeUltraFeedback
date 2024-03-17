@@ -17,14 +17,18 @@ class ModelArguments:
         metadata={"help": "Revision of the model on HuggingFace Hub or local path."}
     )
 
-    # Arguments for evaluation benchmark - responses rating
-    model_a: Optional[str] = field(
+    # Arguments for CODAL-Bench
+    model_test: Optional[str] = field(
         default=None,
         metadata={"help": "Name of the model to judge when generating ratings."}
     )
     model_judge: Optional[str] = field(
         default=None,
         metadata={"help": "Name of the LLM judge (must be an OpenAI model)."}
+    )
+    model_reference: Optional[str] = field(
+        default=None,
+        metadata={"help": "Name of the model responses to use as references for single-answer grading."}
     )
 
 
@@ -47,14 +51,10 @@ class DataArguments:
         metadata={"help": "The chat template to use."}
     )
 
-    # Arguments for evaluation benchmark - responses rating
+    # Arguments for CODAL-Bench
     model_responses_dir: Optional[str] = field(
         default=None,
         metadata={"help": "Directory containing model responses."}
-    )
-    references_path: Optional[str] = field(
-        default=None,
-        metadata={"help": "Path to the file containing the references used for rating LLMs responses."}
     )
 
     preprocessing_num_workers: Optional[int] = field(

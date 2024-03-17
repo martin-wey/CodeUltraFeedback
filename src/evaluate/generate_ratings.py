@@ -20,6 +20,8 @@ from src.utils import (
     setup_logger, load_dataset, load_model_and_tokenizer
 )
 
+judges = ("gpt-3.5-turbo", "gpt-4-turbo")
+
 
 def main():
     parser = H4ArgumentParser((ModelArguments, DataArguments, GenerationConfig))
@@ -31,40 +33,29 @@ def main():
     logger.info(f"Loading dataset: {data_args.dataset_name_or_path}")
     dataset = load_dataset(data_args.dataset_name_or_path, data_args.dataset_split)
 
-    if data_args.references_path:
-        logger.info(f"Loading references: {data_args.references_path}")
-        assert os.path.exists(data_args.references_path), \
-            f"Cannot load references file: {data_args.references_path} does not exist."
-        with open(data_args.references_path, 'r') as f:
-            references = [json.loads(l) for l in f]
-        references_instructions = [r['instruction'] for r in references]
-
-        # ensure the references are correctly mapped with the instructions
-        def get_response(example):
-            index = references_instructions.index(example['instruction'])
-            return {'reference': references[index]['response']}
-
-        dataset = dataset.add_column('reference', [None] * len(dataset))
-        dataset = dataset.map(get_response)
+    model_references = [column.split("_")[0] for column in dataset.column_names
+                        if column not in ["instruction", "preference"]]
+    if model_args.model_reference not in model_references:
+        raise ValueError(f"{model_args.model_reference} not found in dataset fields.")
 
     logger.info("Loading responses...")
-    model_a_path = os.path.join(data_args.model_responses_dir, f'{model_args.model_a}_responses.jsonl')
-    assert os.path.exists(model_a_path), f"Cannot load model responses: {model_a_path} does not exist."
+    model_test_path = os.path.join(data_args.model_responses_dir, f'{model_args.model_test}_responses.jsonl')
+    assert os.path.exists(model_test_path), f"Cannot load model responses: {model_test_path} does not exist."
 
-    responses_data = []
-    with open(model_a_path, 'r') as f:
-        for line in f:
-            line_data = json.loads(line)
-            responses_data.append(line_data['response'])
+    with open(model_test_path, 'r') as f:
+        responses = [json.loads(l) for l in f]
 
-    logger.info(f"Loading model: {model_args.model_name}")
+    logger.info(f"Loading judge model: {model_args.model_judge}")
+    if model_args.model_judge not in judges:
+        raise ValueError(f"{model_args.model_judge} not in judges: {judges}")
+
     generator, _, _ = load_model_and_tokenizer(model_args, generation_args)
 
     output_dir = os.path.join(data_args.model_responses_dir, 'single')
     if not os.path.exists(output_dir):
         os.makedirs(output_dir, exist_ok=True)
 
-    output_file = os.path.join(output_dir, f'{model_args.model_a}_judge_{model_args.model_judge}.jsonl')
+    output_file = os.path.join(output_dir, f'{model_args.model_test}_judge_{model_args.model_judge}.jsonl')
 
     with open(output_file, "w") as fout:
         progress_bar_prefix = "Single-answer grading"
@@ -84,10 +75,9 @@ def main():
                 #   The assessed LLM responses can potentially trigger `openai.BadRequestError`. It typically
                 #   happens when the response contains hallucination in the form of repeated tokens/words.
 
-                responses = responses_data[0]
                 prompt = single_grading_templates[sample['preference']].format(
                     instruction=sample['instruction'],
-                    reference=sample['reference'],
+                    reference=sample[f"{model_args.model_judge}_response"],
                     response=responses[i]
                 )
 

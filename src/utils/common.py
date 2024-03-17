@@ -46,25 +46,15 @@ def load_dataset(dataset_name_or_path, split=None):
 
 
 def load_model_and_tokenizer(model_args, generation_args):
-    if not model_args.model_name_or_path:
-        if "gpt-" in model_args.model_name:
-            client = OpenAI()
-            generator = APICaller(
-                model=model_args.model_name,
-                client=client,
-                temperature=generation_args.temperature,
-                max_tokens=generation_args.max_new_tokens,
-                top_p=generation_args.top_p
-            )
-        elif "claude" in model_args.model_name:
-            client = anthropic.Anthropic()
-            generator = APICaller(
-                model=model_args.model_name,
-                client=client,
-                temperature=generation_args.temperature,
-                max_tokens=generation_args.max_new_tokens,
-                top_p=generation_args.top_p
-            )
+    if not model_args.model_name_or_path and ("gpt-" in model_args.model_name or "claude" in model_args.model_name):
+        client = OpenAI() if "gpt-" in model_args.model_name else anthropic.Anthropic()
+        generator = APICaller(
+            model=model_args.model_name,
+            client=client,
+            temperature=generation_args.temperature,
+            max_tokens=generation_args.max_new_tokens,
+            top_p=generation_args.top_p
+        )
         return generator, None, None
     elif "GPTQ" in model_args.model_name_or_path:
         tokenizer = AutoTokenizer.from_pretrained(model_args.model_name_or_path, use_fast=True)
@@ -93,6 +83,7 @@ def load_model_and_tokenizer(model_args, generation_args):
 
 
 class APICaller:
+
     def __init__(self, model, client=None, retries=5, temperature=0.8, max_tokens=1024, top_p=1.0):
         self.model = model
         self.client = client
@@ -106,7 +97,7 @@ class APICaller:
         error = ""
         while attempt < self.retries:
             try:
-                if "gpt-" in self.model:
+                if isinstance(self.client, openai.OpenAI):
                     response = self.client.chat.completions.create(**{
                         "model": self.model,
                         "messages": [
@@ -118,9 +109,9 @@ class APICaller:
                         "top_p": self.top_p
                     })
                     return response.choices[0].message.content
-                elif "claude" in self.model:
+                elif isinstance(self.client, anthropic.Anthropic):
                     message = self.client.messages.create(
-                        model="claude-3-sonnet-20240229",
+                        model=self.model,
                         max_tokens=self.max_tokens,
                         temperature=self.temperature,
                         system=system_prompt,

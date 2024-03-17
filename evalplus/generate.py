@@ -1,5 +1,5 @@
 # Source: https://github.com/evalplus/evalplus/blob/master/codegen/generate.py
-# Slightly adapted for Transformers and AutoGPTQ libraries
+# Slightly adapted for unsloth
 
 import argparse
 import os

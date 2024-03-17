@@ -53,7 +53,7 @@ if __name__ == '__main__':
     if not os.path.exists(base_dir):
         os.makedirs(base_dir, exist_ok=True)
 
-    with open(os.path.join(base_dir, f'{model_args.model_name}_responses.jsonl'), "w") as f:
+    with (open(os.path.join(base_dir, f'{model_args.model_name}_responses.jsonl'), "w") as f):
         with Progress(
             TextColumn(
                 f"Generate responses  •" + "[progress.percentage]{task.percentage:>3.0f}%"
@@ -68,7 +68,6 @@ if __name__ == '__main__':
                     response = generator(
                         system_prompt="",
                         user_prompt=f"{principles[sample['preference']][0]}\n\n{sample['instruction']}")
-                    response = response.choices[0].message.content
                     logger.info(f'Prompt:\n\n{sample["instruction"]}\n\nResponse:\n\n{response}')
                 else:
                     response = generator(sample['prompt'], **generator_kwargs)
