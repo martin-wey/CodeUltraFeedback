@@ -51,7 +51,7 @@ def main():
 
     generator, _, _ = load_model_and_tokenizer(model_args, generation_args)
 
-    output_dir = os.path.join(data_args.model_responses_dir, 'single')
+    output_dir = os.path.join(data_args.model_responses_dir, 'single', model_args.model_reference)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir, exist_ok=True)
 

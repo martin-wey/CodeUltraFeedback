@@ -46,6 +46,7 @@ def load_dataset(dataset_name_or_path, split=None):
 
 
 def load_model_and_tokenizer(model_args, generation_args):
+    model_args.model_name = model_args.model_judge if model_args.model_judge is not None else model_args.model_name
     if not model_args.model_name_or_path and ("gpt-" in model_args.model_name or "claude" in model_args.model_name):
         client = OpenAI() if "gpt-" in model_args.model_name else anthropic.Anthropic()
         generator = APICaller(
@@ -85,7 +86,7 @@ def load_model_and_tokenizer(model_args, generation_args):
 class APICaller:
 
     def __init__(self, model, client=None, retries=5, temperature=0.8, max_tokens=1024, top_p=1.0):
-        self.model = model
+        self.model = "gpt-4-turbo-preview" if model == "gpt-4-turbo" else model
         self.client = client
         self.retries = retries
         self.temperature = temperature

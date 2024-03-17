@@ -22,6 +22,8 @@
 
 > [!NOTE]
 > 
+> [03-17-2024] 🔥 We updated our code to support Claude-3 models for grading.  [CODAL-Bench](https://huggingface.co/datasets/coseal/codal-bench) now includes `claude-3-haiku-20240307` responses.
+ > 
 > [03-13-2024] 🏆 We are preparing a leaderboard for CODAL-Bench, stay tuned!
 >
 > [03-13-2024] 🔥 We release the first version of CodeUltraFeedback and CODAL-Bench.
