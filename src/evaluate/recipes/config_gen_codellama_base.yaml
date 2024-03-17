@@ -4,7 +4,7 @@ revision: gptq-4bit-32g-actorder_True
 model_name: codellama-7b-instruct
 
 # Data arguments
-dataset_name_or_path: datasets/dataset_splits
+dataset_name_or_path: coseal/codal-bench
 dataset_split: test
 output_dir: runs/eval_results/
 chat_template: "{% for message in messages %}\n{% if message['role'] == 'user' %}\n{{ message['content'] + ' [/INST]' }}\n{% elif message['role'] == 'system' %}\n{{ '[INST] ' + message['content'] }}{% elif message['role'] == 'assistant' %}{{ message['content'] }}\n{% endif %}\n{% endfor %}"
