@@ -20,7 +20,7 @@ from src.utils import (
     setup_logger, load_dataset, load_model_and_tokenizer
 )
 
-judges = ("gpt-3.5-turbo", "gpt-4-turbo")
+judges = ("gpt-3.5-turbo", "gpt-4-turbo", "claude-3-haiku-20240307")
 
 
 def main():
