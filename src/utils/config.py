@@ -69,7 +69,7 @@ class GenerationConfig:
         default=1024,
         metadata={"help": "Maximum number of new tokens to generate."},
     )
-    temperature: Optional[int] = field(
+    temperature: Optional[float] = field(
         default=0.8,
         metadata={"help": "Temperature value for generation."},
     )
