@@ -30,7 +30,7 @@
 
 **Contact:** If you have any inquiries or want to raise an issue, please feel free to contact:
 - [Martin Weyssow](https://martin-wey.github.io/) at [martin.weyssow@umontreal.ca](mailto:martin.weyssow@umontreal.ca), or
-- [Aton Kamanda](https://atonkamanda.github.io/) at [aton.kamanda@umontreal.ca](mailto:aton.kamanda@umontreal.ca).
+- [Aton Kamanda](https://atonkamanda.github.io/) at [atonkamanda@hotmail.com](mailto:atonkamanda@hotmail.com).
 
 ## About
 
